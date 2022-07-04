@@ -19,6 +19,7 @@
     "@angular/forms": "5.2.11",
     "@angular/platform-browser": "5.2.11",
     "@angular/platform-browser-dynamic": "5.2.11",
+    "@capacitor/core": "3.6.0",
     "@ionic-native/core": "4.20.0",
     "@ionic-native/splash-screen": "4.20.0",
     "@ionic-native/status-bar": "4.20.0",
@@ -30,6 +31,7 @@
     "zone.js": "0.8.29"
   },
   "devDependencies": {
+    "@capacitor/cli": "3.6.0",
     "@ionic/app-scripts": "3.2.4",
     "typescript": "2.6.2"
   },
