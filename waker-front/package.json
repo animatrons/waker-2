@@ -21,6 +21,7 @@
     "@angular/router": "^14.0.0",
     "@capacitor/android": "^3.6.0",
     "@capacitor/core": "3.6.0",
+    "@codetrix-studio/capacitor-google-auth": "^3.1.4",
     "@ionic/angular": "^6.1.9",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",

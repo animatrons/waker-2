@@ -1,0 +1,6 @@
+{
+	"appId": "com.waker.front",
+	"appName": "waker-front",
+	"webDir": "www",
+	"bundledWebRuntime": false
+}

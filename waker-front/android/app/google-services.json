@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "635930979688",
+    "project_id": "amin-house",
+    "storage_bucket": "amin-house.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635930979688:android:966a2ea381340149047add",
+        "android_client_info": {
+          "package_name": "com.waker.front"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635930979688-ugul5h3cj0ghgqpe78tmdde1her782hh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.waker.front",
+            "certificate_hash": "83b13960dbdd200a2a1432a2266760969552b1f5"
+          }
+        },
+        {
+          "client_id": "635930979688-fd325hl0d5heja66sjbqv7cotmhu6phn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBg2qtyKC3GmrV1b3r1DZa-4N5JfjeJOWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635930979688-fd325hl0d5heja66sjbqv7cotmhu6phn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

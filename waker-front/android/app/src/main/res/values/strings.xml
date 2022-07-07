@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">waker-front</string>
+    <string name="title_activity_main">waker-front</string>
+    <string name="package_name">com.waker.front</string>
+    <string name="custom_url_scheme">com.waker.front</string>
+    <string name="server_client_id">635930979688-fd325hl0d5heja66sjbqv7cotmhu6phn.apps.googleusercontent.com</string>
+</resources>
