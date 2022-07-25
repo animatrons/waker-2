@@ -32,7 +32,7 @@ public class MongodbManagerFactory {
                 if (Optional.ofNullable(host).isEmpty() || Optional.ofNullable(portStr).isEmpty()) {
                     throw new TechnicalException(TechnicalErrorCodesAndMessages.DATABASE_ENV_VAR_UNDEFINED);
                 }
-                int port = Integer.parseInt(System.getenv("mongodbPort"));
+                int port = Integer.parseInt(portStr);
                 MongoCredential mongoCredential = MongoCredential.createCredential(userName, domain, password.toCharArray());
                 ServerAddress serverAddress = new ServerAddress(host, port);
 
