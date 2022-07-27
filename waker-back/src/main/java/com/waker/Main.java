@@ -4,62 +4,101 @@ import org.eclipse.jetty.annotations.AnnotationConfiguration;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.webapp.Configuration;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.webapp.WebInfConfiguration;
-import org.eclipse.jetty.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.webapp.*;
 
+import java.io.File;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
+import java.nio.file.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         System.out.println("App launched.");
 
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8888"));
+        int port = 8080;
         Server server = new Server(port);
-        // Create HTTP Config
-        HttpConfiguration httpConfiguration = new HttpConfiguration();
-        // Add support for X-Forwarded headers
-        httpConfiguration.addCustomizer(new ForwardedRequestCustomizer());
-        // Create the http connector
-        HttpConnectionFactory connectionFactory = new HttpConnectionFactory(httpConfiguration);
-        ServerConnector connector = new ServerConnector(server, connectionFactory);
-        // Make sure you set the port on the connector, the port in the Server constructor is overridden by the new connector
-        connector.setPort(port);
-        server.setConnectors(new ServerConnector[] { connector });
 
-        WebAppContext webAppContext = new WebAppContext();
-        server.setHandler(webAppContext);
-        // Load static resources from the jar
-        URL webAppDir = Main.class.getClassLoader().getResource("resources");
-        assert webAppDir != null;
-        webAppContext.setResourceBase(webAppDir.toURI().toString());
-        // Enable annotations so the server sees classes annotated with @WebServlet.
-        webAppContext
-                .setConfigurations(new Configuration[] {
-                        new AnnotationConfiguration(),
-                        new WebInfConfiguration(),
-                        new WebXmlConfiguration()
-                });
-        // Look for annotations in the classes' directory (dev server) and in the
-        // jar file (live server)
-        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-                ".*/target/classes/|.*waker-back.*\\.jar");
-
-        ServletHolder defaultServletHolder = new ServletHolder(DefaultServlet.class);
-        defaultServletHolder.setInitParameter("dirAllowed", "false");
-        defaultServletHolder.setInitParameter("cacheControl", "public,max-age=3600,stale-while-revalidate=86400");
-        /*webAppContext.addServlet(defaultServletHolder, "/assets/*");
-        webAppContext.addServlet(defaultServletHolder, "/public/*");*/
-        webAppContext.getServletHandler().addServlet(defaultServletHolder);
-
-        // Start the server!
+        URI webResourceBase = findWebResourceBase(server.getClass().getClassLoader());
+        System.err.println("Using BaseResource: " + webResourceBase);
+        WebAppContext context = new WebAppContext();
+        context.setBaseResource(Resource.newResource(webResourceBase));
+        // ensure just classes from the webapp that are on the server classpath are scanned for annotations
+        // https://github.com/jetty-project/embedded-servlet-server/issues/51
+        context.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",".*/target/classes/.*$");
+        // this package is normally hidden from the webapp, so expose it
+        context.getServerClassMatcher().add("-com.waker.");
+        context.setContextPath("/");
+        context.setWelcomeFiles(new String[]{"index.html", "welcome.html"});
+        context.setParentLoaderPriority(true);
+        server.setHandler(context);
         server.start();
         System.out.println("Server started!");
-
-        // Keep the main thread alive while the server is running.
         server.join();
+    }
+
+    private static URI findWebResourceBase(ClassLoader classLoader)
+    {
+        String webResourceRef = "WEB-INF/web.xml";
+
+        try
+        {
+            // Look for resource in classpath (best choice when working with archive jar/war file)
+            URL webXml = classLoader.getResource('/' + webResourceRef);
+            if (webXml != null)
+            {
+                URI uri = webXml.toURI().resolve("..").normalize();
+                System.err.printf("WebResourceBase (Using ClassLoader reference) %s%n", uri);
+                return uri;
+            }
+        }
+        catch (URISyntaxException e)
+        {
+            throw new RuntimeException("Bad ClassPath reference for: " + webResourceRef, e);
+        }
+
+        // Look for resource in common file system paths
+        try
+        {
+            Path pwd = new File(System.getProperty("user.dir")).toPath().toRealPath();
+            FileSystem fs = pwd.getFileSystem();
+
+            // Try the generated maven path first
+            PathMatcher matcher = fs.getPathMatcher("glob:**/embedded-servlet-*");
+            try (DirectoryStream<Path> dir = Files.newDirectoryStream(pwd.resolve("target")))
+            {
+                for (Path path : dir)
+                {
+                    if (Files.isDirectory(path) && matcher.matches(path))
+                    {
+                        // Found a potential directory
+                        Path possible = path.resolve(webResourceRef);
+                        // Does it have what we need?
+                        if (Files.exists(possible))
+                        {
+                            URI uri = path.toUri();
+                            System.err.printf("WebResourceBase (Using discovered /target/ Path) %s%n", uri);
+                            return uri;
+                        }
+                    }
+                }
+            }
+
+            // Try the source path next
+            Path srcWebapp = pwd.resolve("src/main/webapp/" + webResourceRef);
+            if (Files.exists(srcWebapp))
+            {
+                URI uri = srcWebapp.getParent().toUri();
+                System.err.printf("WebResourceBase (Using /src/main/webapp/ Path) %s%n", uri);
+                return uri;
+            }
+        }
+        catch (Throwable t)
+        {
+            throw new RuntimeException("Unable to find web resource in file system: " + webResourceRef, t);
+        }
+
+        throw new RuntimeException("Unable to find web resource ref: " + webResourceRef);
     }
 }
