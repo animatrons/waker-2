@@ -1,8 +1,7 @@
 package com.waker.service.penalty;
 
-import com.waker.model.penalty.config.APenaltyConfig;
 
-public interface IPenaltyService<T extends APenaltyConfig> {
+public interface IPenaltyService {
 
-    void penalize(T config);
+//    void penalize(T config);
 }

@@ -1,8 +1,9 @@
 package com.waker.model.penalty;
 
-import com.waker.model.penalty.config.APenaltyConfig;
+import lombok.Getter;
 
-public abstract class APenalty<T extends APenaltyConfig> {
+@Getter
+public abstract class APenalty {
 
-    private T config;
+    private String signature;
 }
