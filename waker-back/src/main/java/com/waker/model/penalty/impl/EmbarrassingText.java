@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetScolded extends APenalty {
+public class EmbarrassingText extends APenalty {
 
-    private final String signature = Penalties.GET_SCOLDED.toString();
-    private String scoldingMessage;
+    private final String signature = Penalties.EMBARRASSING_TEXT.toString();
+    private String text;
 }

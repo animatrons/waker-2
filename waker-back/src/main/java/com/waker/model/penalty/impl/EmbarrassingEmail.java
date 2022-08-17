@@ -1,5 +1,6 @@
 package com.waker.model.penalty.impl;
 
+import com.waker.model.Email;
 import com.waker.model.penalty.APenalty;
 import com.waker.model.penalty.Penalties;
 import lombok.AllArgsConstructor;
@@ -11,8 +12,8 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetScolded extends APenalty {
+public class EmbarrassingEmail extends APenalty {
 
-    private final String signature = Penalties.GET_SCOLDED.toString();
-    private String scoldingMessage;
+    private final String signature = Penalties.EMBARRASSING_EMAIL.toString();
+    private Email email;
 }
