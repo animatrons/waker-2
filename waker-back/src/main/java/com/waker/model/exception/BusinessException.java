@@ -8,10 +8,10 @@ public class BusinessException extends Exception {
     public BusinessException() {
         super();
     }
-    public BusinessException(BusinessErrorCodesAndMessages codesAndMessages) {
+    public BusinessException(BusinessErrorCodesAndMessages codesAndMessages, String info) {
         super();
         this.code = codesAndMessages.name();
-        this.message = codesAndMessages.toString();
+        this.message = codesAndMessages.toString() + "\n" + info;
     }
     public BusinessException(String code, String message) {
         super();
