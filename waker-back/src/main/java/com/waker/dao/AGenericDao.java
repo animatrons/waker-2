@@ -19,7 +19,7 @@ public abstract class AGenericDao<T extends AModel> implements IGenericDao<T> {
 
     protected final Class<T> targetClass;
 
-    protected AGenericDao(Class<T> targetClass) {
+    public AGenericDao(Class<T> targetClass) {
         this.targetClass = targetClass;
     }
 

@@ -17,6 +17,12 @@ public class TechnicalException extends Exception {
         this.code = codesAndMessages.name();
         this.message = codesAndMessages.toString();
     }
+
+    public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages, String info) {
+        super();
+        this.code = codesAndMessages.name();
+        this.message = codesAndMessages.toString() + "  \n  " + info;
+    }
     public TechnicalException(String code, String message) {
         super();
         this.code = code;
