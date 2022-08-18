@@ -24,6 +24,7 @@ public class Reminder extends AModel {
     private Date deadline;
     private FulfillmentMethod fulfillmentMethod;
     private APenalty penaltySetting;
+    private String penaltyMethod;
     /*
     * 1 : fulfilled
     * 0 : pending

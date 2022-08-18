@@ -5,6 +5,7 @@ import com.waker.model.dto.ResponseDTO;
 import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
+import com.waker.model.penalty.APenalty;
 import com.waker.service.IReminderService;
 import com.waker.service.impl.ReminderService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ public class ReminderApp {
             instance = new ReminderApp();
         return instance;
     }
+
+    PenaltyApp penaltyApp = PenaltyApp.getInstance();
     IReminderService reminderService = ReminderService.getInstance();
 
     public ResponseDTO<Reminder> save(Reminder reminder) {
@@ -52,17 +55,37 @@ public class ReminderApp {
         return response;
     }
 
-    public boolean wasViolated(Reminder reminder) {
-        boolean wasViolated = false;
+    public ResponseDTO<Reminder> takeAction(boolean toPunish, String id) {
+        ResponseDTO<Reminder> reminderResponse = this.get(id);
+        ResponseDTO<APenalty> response = new ResponseDTO<>();
+        if (reminderResponse.getStatus() == 200) {
+            Reminder reminder = reminderResponse.getData();
+            response = penaltyApp.takeAction(toPunish, reminder.getPenaltyMethod(), reminder.getPenaltySetting());
+            reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage());
+            if (toPunish && response.getStatus() == 200)
+                this.updateStatus(reminder.getKey(), -1);
+        }
+        return reminderResponse;
+    }
+
+    public ResponseDTO<Reminder> takeAction(boolean toPunish, Reminder reminder) {
+        ResponseDTO<APenalty> response = penaltyApp.takeAction(toPunish, reminder.getPenaltyMethod(), reminder.getPenaltySetting());
+        if (toPunish && response.getStatus() == 200)
+            this.updateStatus(reminder.getKey(), -1);
+        return new ResponseDTO<>(reminder, reminder.getStatus(), response.getMessage());
+    }
+
+    public boolean missed(Reminder reminder) {
+        boolean missed = false;
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime deadLine = ZonedDateTime.from(reminder.getDeadline().toInstant()).plusHours(24);
         if (reminder.getStatus() == 0) {
-            wasViolated = true;
+            missed = true;
         }
         if (!now.isAfter(deadLine)) {
-            wasViolated = false;
+            missed = false;
         }
-        return wasViolated;
+        return missed;
     }
 
     public ResponseDTO<Reminder> updateStatus(String id, int status) {
