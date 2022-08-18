@@ -11,7 +11,7 @@ import lombok.*;
 public class ResponseDTO<T> {
 
     private T data;
-    private String status;
+    private int status;
     // TODO: generate messages by data class name, key (&/or name), and method, AND status (success or fail)
     private String message;
     private Integer page;
@@ -19,7 +19,7 @@ public class ResponseDTO<T> {
     private Integer start;
     private Integer total;
 
-    public ResponseDTO(T obj, String status, String message) {
+    public ResponseDTO(T obj, int status, String message) {
         this.data = obj;
         this.status = status;
         this.message = message;

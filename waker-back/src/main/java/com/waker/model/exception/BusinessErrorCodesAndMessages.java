@@ -12,6 +12,11 @@ public enum BusinessErrorCodesAndMessages {
             return "PAGE NOT FOUND";
         }
     },
+    INVALID_VALUE_IN_FIELDS {
+        public String toString() {
+            return "INVALID VALUE IN FIELDS";
+        }
+    },
     MISSING_REQUIRED_FIELDS {
         public String toString() {
             return "MISSING REQUIRED FIELDS";
