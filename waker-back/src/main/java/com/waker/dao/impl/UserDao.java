@@ -1,16 +1,16 @@
 package com.waker.dao.impl;
 
 import com.waker.dao.AGenericDao;
-import com.waker.dao.IUser;
+import com.waker.dao.IUserDao;
 import com.waker.model.User;
 
-public class UserDao extends AGenericDao<User> implements IUser {
+public class UserDao extends AGenericDao<User> implements IUserDao {
     private UserDao() {
         super(User.class);
     }
 
-    private static UserDao instance = null;
+    private static final UserDao instance = new UserDao();
     public static UserDao getInstance() {
-        return instance != null ? instance : (instance = new UserDao());
+        return instance;
     }
 }

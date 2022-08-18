@@ -1,16 +1,16 @@
 package com.waker.dao.impl;
 
 import com.waker.dao.AGenericDao;
-import com.waker.dao.IReminder;
+import com.waker.dao.IReminderDao;
 import com.waker.model.Reminder;
 
-public class ReminderDao extends AGenericDao<Reminder> implements IReminder {
+public class ReminderDao extends AGenericDao<Reminder> implements IReminderDao {
     private ReminderDao() {
         super(Reminder.class);
     }
 
-    private static ReminderDao instance = null;
+    private static final ReminderDao instance = new ReminderDao();
     public static ReminderDao getInstance() {
-        return instance != null ? instance : (instance = new ReminderDao());
+        return instance;
     }
 }
