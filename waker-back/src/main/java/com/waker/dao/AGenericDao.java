@@ -4,6 +4,7 @@ import com.waker.model.AModel;
 import com.waker.model.exception.TechnicalErrorCodesAndMessages;
 import com.waker.model.exception.TechnicalException;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.jongo.Find;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -32,7 +33,7 @@ public abstract class AGenericDao<T extends AModel> implements IGenericDao<T> {
             tClassInstance = this.targetClass.getDeclaredConstructor().newInstance();
             String collectionName = tClassInstance.getCollectionName();
             MongoCollection collection = jongo.getCollection(collectionName);
-            result = collection.findOne(id).as(targetClass);
+            result = collection.findOne(new ObjectId(id)).as(targetClass);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
             throw new TechnicalException(TechnicalErrorCodesAndMessages.DATABASE_ERROR);
@@ -111,7 +112,7 @@ public abstract class AGenericDao<T extends AModel> implements IGenericDao<T> {
             tClassInstance = this.targetClass.getDeclaredConstructor().newInstance();
             String collectionName = tClassInstance.getCollectionName();
             MongoCollection collection = jongo.getCollection(collectionName);
-            collection.remove(id);
+            collection.remove(new ObjectId(id));
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             log.error(e.getMessage(), e);
             throw new TechnicalException(TechnicalErrorCodesAndMessages.DATABASE_ERROR);
