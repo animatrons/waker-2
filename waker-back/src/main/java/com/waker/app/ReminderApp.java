@@ -6,11 +6,13 @@ import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
 import com.waker.model.penalty.APenalty;
+import com.waker.model.penalty.Penalties;
 import com.waker.service.IReminderService;
 import com.waker.service.impl.ReminderService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 @Slf4j
 public class ReminderApp {
@@ -30,10 +32,11 @@ public class ReminderApp {
         ResponseDTO<Reminder> response;
 
         try {
-            if (this.check(reminder)) {
+            if (!this.isValid(reminder)) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "");
             }
-            reminderService.addOrUpdate(reminder);
+            String id = reminderService.addOrUpdate(reminder);
+            reminder.setKey(id);
             response = new ResponseDTO<>(reminder, 200, "Reminder saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
@@ -60,7 +63,7 @@ public class ReminderApp {
         ResponseDTO<APenalty> response = new ResponseDTO<>();
         if (reminderResponse.getStatus() == 200) {
             Reminder reminder = reminderResponse.getData();
-            response = penaltyApp.takeAction(toPunish, reminder.getPenaltyMethod(), reminder.getPenaltySetting());
+            response = penaltyApp.takeAction(toPunish, reminder.getPenaltySetting().get_class(), reminder.getPenaltySetting());
             reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage());
             if (toPunish && response.getStatus() == 200)
                 this.updateStatus(reminder.getKey(), -1);
@@ -69,7 +72,7 @@ public class ReminderApp {
     }
 
     public ResponseDTO<Reminder> takeAction(boolean toPunish, Reminder reminder) {
-        ResponseDTO<APenalty> response = penaltyApp.takeAction(toPunish, reminder.getPenaltyMethod(), reminder.getPenaltySetting());
+        ResponseDTO<APenalty> response = penaltyApp.takeAction(toPunish, reminder.getPenaltySetting().get_class(), reminder.getPenaltySetting());
         if (toPunish && response.getStatus() == 200)
             this.updateStatus(reminder.getKey(), -1);
         return new ResponseDTO<>(reminder, reminder.getStatus(), response.getMessage());
@@ -94,7 +97,7 @@ public class ReminderApp {
         try {
             Reminder reminder = reminderService.get(id);
             reminder.setStatus(status);
-            if (this.check(reminder)) {
+            if (!this.isValid(reminder)) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "");
             }
             reminderService.addOrUpdate(reminder);
@@ -106,10 +109,14 @@ public class ReminderApp {
         return response;
     }
 
-    private boolean check(Reminder reminder) {
+    private boolean isValid(Reminder reminder) {
         if (reminder.getStatus() != -1 && reminder.getStatus() != 0 && reminder.getStatus() != 1) {
-            return true;
+            return false;
         }
-        return false;
+        String aClass = reminder.getPenaltySetting().get_class();
+        if (Arrays.stream(Penalties.values()).anyMatch(penalty -> penalty.toString().equals(aClass))) {
+            return false;
+        }
+        return true;
     }
 }
