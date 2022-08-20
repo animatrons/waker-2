@@ -20,7 +20,7 @@ public class PenaltyApp {
 
     private void punish(String method, APenalty penaltySettings) throws BusinessException {
         PenaltyFactory penaltyFactory = PenaltyFactory.getInstance();
-        System.out.printf("Penalty object signature %s\n", penaltySettings.getSignature());
+        System.out.printf("Penalty object signature %s\n", penaltySettings.get_class());
         System.out.printf("Parameter penalty method name %s", method);
         IPenaltyService<APenalty> penaltyService = penaltyFactory.getService(method);
         penaltyService.penalize(penaltySettings);

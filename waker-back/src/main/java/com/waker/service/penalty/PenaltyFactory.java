@@ -8,10 +8,12 @@ import com.waker.service.penalty.impl.EmbarrassingEmailService;
 import com.waker.service.penalty.impl.EmbarrassingTextService;
 import com.waker.service.penalty.impl.GetScoldedService;
 
+import java.util.SplittableRandom;
+
 public class PenaltyFactory {
 
     private static PenaltyFactory instance = null;
-    private PenaltyFactory() {};
+    private PenaltyFactory() {}
     public static PenaltyFactory getInstance() {
         return instance != null ? instance : (instance = new PenaltyFactory());
     }
