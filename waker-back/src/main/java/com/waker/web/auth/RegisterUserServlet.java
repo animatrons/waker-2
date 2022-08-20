@@ -21,9 +21,10 @@ public class RegisterUserServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.addHeader("Content-Type", "application/json");
         JsonReader jsonReader = new JsonReader(req.getReader());
         User user = gson.fromJson(jsonReader, User.class);
         ResponseDTO<User> response = this.app.register(user);
-        resp.getWriter().println(response);
+        resp.getWriter().println(gson.toJson(response));
     }
 }
