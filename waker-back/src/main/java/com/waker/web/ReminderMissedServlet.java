@@ -1,5 +1,6 @@
 package com.waker.web;
 
+import com.google.gson.Gson;
 import com.waker.app.ReminderApp;
 import com.waker.model.Reminder;
 import com.waker.model.dto.ResponseDTO;
@@ -15,11 +16,12 @@ import java.io.IOException;
 public class ReminderMissedServlet extends HttpServlet {
 
     ReminderApp app = ReminderApp.getInstance();
-
+    Gson gson = new Gson();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.addHeader("Content-Type", "application/json");
         String id = req.getParameter("id");
         ResponseDTO<Reminder> response = app.takeAction(true, id);
-        resp.getWriter().println(response);
+        resp.getWriter().println(gson.toJson(response));
     }
 }
