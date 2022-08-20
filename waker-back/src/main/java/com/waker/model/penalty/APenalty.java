@@ -1,13 +1,19 @@
 package com.waker.model.penalty;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "_class")
 public abstract class APenalty {
 
-    private String signature;
+    /*
+    * Must match one of these penalty class names, in Penalties enum
+    * */
+    private String _class;
+    public APenalty(String _class) {
+        this._class = _class;
+    }
 }
