@@ -4,15 +4,16 @@ import com.waker.model.penalty.APenalty;
 import com.waker.model.penalty.Penalties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 public class GetScolded extends APenalty {
 
-    private final String signature = Penalties.GET_SCOLDED.toString();
     private String scoldingMessage;
+
+    public GetScolded() {
+        super(Penalties.GET_SCOLDED.toString());
+    }
 }
