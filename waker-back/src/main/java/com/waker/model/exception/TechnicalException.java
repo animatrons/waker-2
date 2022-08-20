@@ -13,18 +13,18 @@ public class TechnicalException extends Exception {
         super();
     }
     public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages) {
-        super();
+        super(codesAndMessages.toString());
         this.code = codesAndMessages.name();
         this.message = codesAndMessages.toString();
     }
 
     public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages, String info) {
-        super();
+        super(codesAndMessages.toString() + "  \n  " + info);
         this.code = codesAndMessages.name();
         this.message = codesAndMessages.toString() + "  \n  " + info;
     }
     public TechnicalException(String code, String message) {
-        super();
+        super(message);
         this.code = code;
         this.message = message;
     }

@@ -8,13 +8,19 @@ public class BusinessException extends Exception {
     public BusinessException() {
         super();
     }
+
+    public BusinessException(BusinessErrorCodesAndMessages codesAndMessages) {
+        super(codesAndMessages.toString());
+        this.code = codesAndMessages.name();
+        this.message = codesAndMessages.toString();
+    }
     public BusinessException(BusinessErrorCodesAndMessages codesAndMessages, String info) {
-        super();
+        super(codesAndMessages.toString() + "\n" + info);
         this.code = codesAndMessages.name();
         this.message = codesAndMessages.toString() + "\n" + info;
     }
     public BusinessException(String code, String message) {
-        super();
+        super(message);
         this.code = code;
         this.message = message;
     }
