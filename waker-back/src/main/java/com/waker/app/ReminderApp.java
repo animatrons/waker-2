@@ -63,16 +63,20 @@ public class ReminderApp {
         ResponseDTO<APenalty> response = new ResponseDTO<>();
         if (reminderResponse.getStatus() == 200) {
             Reminder reminder = reminderResponse.getData();
-            response = penaltyApp.takeAction(toPunish, reminder.getPenaltySetting().get_class(), reminder.getPenaltySetting());
+            boolean isPunishable = toPunish && reminder.getStatus() == 0;
+            response = penaltyApp.takeAction(isPunishable, reminder.getPenaltySetting());
+            if (isPunishable && response.getStatus() == 200) {
+                reminderResponse = this.updateStatus(reminder.getKey(), -1);
+                reminder = reminderResponse.getData();
+            }
             reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage());
-            if (toPunish && response.getStatus() == 200)
-                this.updateStatus(reminder.getKey(), -1);
         }
         return reminderResponse;
     }
 
     public ResponseDTO<Reminder> takeAction(boolean toPunish, Reminder reminder) {
-        ResponseDTO<APenalty> response = penaltyApp.takeAction(toPunish, reminder.getPenaltySetting().get_class(), reminder.getPenaltySetting());
+        boolean isPunishable = toPunish && reminder.getStatus() == 0;
+        ResponseDTO<APenalty> response = penaltyApp.takeAction(isPunishable, reminder.getPenaltySetting());
         if (toPunish && response.getStatus() == 200)
             this.updateStatus(reminder.getKey(), -1);
         return new ResponseDTO<>(reminder, reminder.getStatus(), response.getMessage());
@@ -114,7 +118,7 @@ public class ReminderApp {
             return false;
         }
         String aClass = reminder.getPenaltySetting().get_class();
-        if (Arrays.stream(Penalties.values()).anyMatch(penalty -> penalty.toString().equals(aClass))) {
+        if (Arrays.stream(Penalties.values()).noneMatch(penalty -> penalty.toString().equals(aClass))) {
             return false;
         }
         return true;
