@@ -1,9 +1,9 @@
 package com.waker;
 
-import org.eclipse.jetty.annotations.AnnotationConfiguration;
+import com.waker.model.Reminder;
+import com.waker.model.penalty.APenalty;
+import com.waker.model.penalty.impl.GetScolded;
 import org.eclipse.jetty.server.*;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.*;
 
@@ -15,9 +15,10 @@ import java.nio.file.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+
         System.out.println("App launched.");
 
-        int port = 8080;
+        int port = Integer.parseInt(System.getenv("PORT"));
         Server server = new Server(port);
 
         URI webResourceBase = findWebResourceBase(server.getClass().getClassLoader());
@@ -34,7 +35,7 @@ public class Main {
         context.setParentLoaderPriority(true);
         server.setHandler(context);
         server.start();
-        System.out.println("Server started!");
+        System.out.println("Server started! \uD83D\uDE80");
         server.join();
     }
 
