@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class User extends AModel {
 
-    private final String collectionName = "user";
+    private final String collectionName = "users";
 
     private String firstName;
     private String lastName;

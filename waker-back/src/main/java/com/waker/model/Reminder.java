@@ -1,6 +1,5 @@
 package com.waker.model;
 
-import com.waker.model.fulfillment.FulfillmentMethod;
 import com.waker.model.penalty.APenalty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class Reminder extends AModel {
 
-    private final String collectionName = "reminder";
+    private final String collectionName = "reminders";
 
     private User user;
     private String name;
@@ -24,7 +23,6 @@ public class Reminder extends AModel {
     private Date deadline;
     private FulfillmentMethod fulfillmentMethod;
     private APenalty penaltySetting;
-    private String penaltyMethod;
     /*
     * 1 : fulfilled
     * 0 : pending
