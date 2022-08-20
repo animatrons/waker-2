@@ -1,4 +1,4 @@
-package com.waker.model.fulfillment;
+package com.waker.model;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.waker.model.fulfillment;
+package com.waker.model;
 
 /**
  * Fulfillment method the user has to complete within the
