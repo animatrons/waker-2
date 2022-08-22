@@ -19,14 +19,16 @@ import java.io.IOException;
 public class ReminderServlet extends HttpServlet {
 
     ReminderApp app = ReminderApp.getInstance();
-    GsonBuilder gsonBuilder = new GsonBuilder();
+    // TODO: make a GsonBuilderManager (among other uses to store default configs like date format)
+    GsonBuilder gsonBuilder = (new GsonBuilder()).setDateFormat("yyyy-MM-dd HH:mm:ss");
 
     Gson gson = new Gson();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.addHeader("Content-Type", "application/json");
-        gsonBuilder.registerTypeAdapter(Reminder.class, new ReminderJsonAdapter());
+        gsonBuilder
+                .registerTypeAdapter(Reminder.class, new ReminderJsonAdapter());
         gson = gsonBuilder.create();
         JsonReader jsonReader = new JsonReader(req.getReader());
         Reminder reminder = gson.fromJson(jsonReader, Reminder.class);

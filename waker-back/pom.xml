@@ -15,6 +15,7 @@
         <lombok.version>1.18.24</lombok.version>
         <exec.mainClass>com.waker.Main</exec.mainClass>
         <mongodb-driver-sync.version>4.6.0</mongodb-driver-sync.version>
+        <iso.date.format>yyyy-MM-dd HH:mm:ss</iso.date.format>
     </properties>
 
     <profiles>
