@@ -38,6 +38,7 @@ public class ReminderApp {
             String id = reminderService.addOrUpdate(reminder);
             reminder.setKey(id);
             response = new ResponseDTO<>(reminder, 200, "Reminder saved");
+            log.info("Reminder saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, 500, "Server Error saving reminder: " + e.getMessage());
@@ -51,6 +52,7 @@ public class ReminderApp {
         try {
             Reminder reminder = reminderService.get(id);
             response = new ResponseDTO<>(reminder, 200, "Reminder found");
+            log.info("Reminder found");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, 500, "Server Error getting reminder: " + e.getMessage());
@@ -70,6 +72,7 @@ public class ReminderApp {
                 reminder = reminderResponse.getData();
             }
             reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage());
+            log.info(response.getMessage());
         }
         return reminderResponse;
     }
@@ -79,6 +82,7 @@ public class ReminderApp {
         ResponseDTO<APenalty> response = penaltyApp.takeAction(isPunishable, reminder.getPenaltySetting());
         if (toPunish && response.getStatus() == 200)
             this.updateStatus(reminder.getKey(), -1);
+        log.info(response.getMessage());
         return new ResponseDTO<>(reminder, reminder.getStatus(), response.getMessage());
     }
 
@@ -106,6 +110,7 @@ public class ReminderApp {
             }
             reminderService.addOrUpdate(reminder);
             response = new ResponseDTO<>(reminder, 200, "Reminder status updated");
+            log.info("Reminder status updated");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, 500, "Server Error updating reminder: " + e.getMessage());

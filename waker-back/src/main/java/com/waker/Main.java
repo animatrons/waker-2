@@ -1,8 +1,5 @@
 package com.waker;
 
-import com.waker.model.Reminder;
-import com.waker.model.penalty.APenalty;
-import com.waker.model.penalty.impl.GetScolded;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.*;
@@ -39,6 +36,7 @@ public class Main {
         server.join();
     }
 
+    // From a project example in https://github.com/jetty-project/embedded-servlet-server
     private static URI findWebResourceBase(ClassLoader classLoader)
     {
         String webResourceRef = "WEB-INF/web.xml";
