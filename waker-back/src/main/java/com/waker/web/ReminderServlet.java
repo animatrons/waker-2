@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.waker.app.ReminderApp;
 import com.waker.model.Reminder;
+import com.waker.model.dto.ReminderDTO;
 import com.waker.model.dto.ResponseDTO;
 import com.waker.model.serialization.ReminderJsonAdapter;
 import jakarta.servlet.ServletException;
@@ -28,11 +29,11 @@ public class ReminderServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.addHeader("Content-Type", "application/json");
         gsonBuilder
-                .registerTypeAdapter(Reminder.class, new ReminderJsonAdapter());
+                .registerTypeAdapter(ReminderDTO.class, new ReminderJsonAdapter());
         gson = gsonBuilder.create();
         JsonReader jsonReader = new JsonReader(req.getReader());
-        Reminder reminder = gson.fromJson(jsonReader, Reminder.class);
-        ResponseDTO<Reminder> response = app.save(reminder);
+        ReminderDTO reminderDto = gson.fromJson(jsonReader, ReminderDTO.class);
+        ResponseDTO<ReminderDTO> response = app.save(reminderDto);
         resp.getWriter().println(gson.toJson(response));
     }
 
@@ -40,7 +41,7 @@ public class ReminderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.addHeader("Content-Type", "application/json");
         String id = req.getParameter("id");
-        ResponseDTO<Reminder> response = app.get(id);
+        ResponseDTO<ReminderDTO> response = app.get(id);
         resp.getWriter().println(gson.toJson(response));
     }
 }

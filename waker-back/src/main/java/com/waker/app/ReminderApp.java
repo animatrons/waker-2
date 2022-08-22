@@ -1,6 +1,8 @@
 package com.waker.app;
 
 import com.waker.model.Reminder;
+import com.waker.model.dto.ReminderDTO;
+import com.waker.model.dto.mapper.ReminderMapperImpl;
 import com.waker.model.dto.ResponseDTO;
 import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
@@ -25,33 +27,37 @@ public class ReminderApp {
         return instance;
     }
 
+    ReminderMapperImpl reminderMapper = new ReminderMapperImpl();
     PenaltyApp penaltyApp = PenaltyApp.getInstance();
     IReminderService reminderService = ReminderService.getInstance();
 
-    public ResponseDTO<Reminder> save(Reminder reminder) {
-        ResponseDTO<Reminder> response;
+    public ResponseDTO<ReminderDTO> save(ReminderDTO reminderDTO) {
+        ResponseDTO<ReminderDTO> response;
 
         try {
-            if (!this.isValid(reminder)) {
-                throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "");
+            if (!reminderDTO.validate()) {
+                throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Reminder has not been validated by our " +
+                        "validators, please make sure all obligatory fields are correctly filled.");
             }
+            Reminder reminder = reminderMapper.asEntity(reminderDTO);
             String id = reminderService.addOrUpdate(reminder);
-            reminder.setKey(id);
-            response = new ResponseDTO<>(reminder, 200, "Reminder saved");
+            reminderDTO.setKey(id);
+            response = new ResponseDTO<>(reminderDTO, 200, "Reminder saved");
             log.info("Reminder saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
-            response = new ResponseDTO<>(null, 500, "Server Error saving reminder: " + e.getMessage());
+            response = new ResponseDTO<>(null, 500, "Server Error saving reminderDTO: " + e.getMessage());
         }
         return response;
     }
 
-    public ResponseDTO<Reminder> get(String id) {
-        ResponseDTO<Reminder> response;
+    public ResponseDTO<ReminderDTO> get(String id) {
+        ResponseDTO<ReminderDTO> response;
 
         try {
             Reminder reminder = reminderService.get(id);
-            response = new ResponseDTO<>(reminder, 200, "Reminder found");
+            ReminderDTO dto = reminderMapper.asDto(reminder);
+            response = new ResponseDTO<>(dto, 200, "Reminder found");
             log.info("Reminder found");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
@@ -60,24 +66,24 @@ public class ReminderApp {
         return response;
     }
 
-    public ResponseDTO<Reminder> takeAction(boolean toPunish, String id) {
-        ResponseDTO<Reminder> reminderResponse = this.get(id);
+    public ResponseDTO<ReminderDTO> takeAction(boolean toPunish, String id) {
+        ResponseDTO<ReminderDTO> reminderResponse = this.get(id);
         ResponseDTO<APenalty> response = new ResponseDTO<>();
         if (reminderResponse.getStatus() == 200) {
-            Reminder reminder = reminderResponse.getData();
+            ReminderDTO reminder = reminderResponse.getData();
             boolean isPunishable = toPunish && reminder.getStatus() == 0;
             response = penaltyApp.takeAction(isPunishable, reminder.getPenaltySetting());
             if (isPunishable && response.getStatus() == 200) {
                 reminderResponse = this.updateStatus(reminder.getKey(), -1);
                 reminder = reminderResponse.getData();
             }
-            reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage());
+            reminderResponse = new ResponseDTO<>(reminder, response.getStatus(), response.getMessage() + " Status update message: " + reminderResponse.getMessage());
             log.info(response.getMessage());
         }
         return reminderResponse;
     }
 
-    public ResponseDTO<Reminder> takeAction(boolean toPunish, Reminder reminder) {
+    public ResponseDTO<ReminderDTO> takeAction(boolean toPunish, ReminderDTO reminder) {
         boolean isPunishable = toPunish && reminder.getStatus() == 0;
         ResponseDTO<APenalty> response = penaltyApp.takeAction(isPunishable, reminder.getPenaltySetting());
         if (toPunish && response.getStatus() == 200)
@@ -86,7 +92,7 @@ public class ReminderApp {
         return new ResponseDTO<>(reminder, reminder.getStatus(), response.getMessage());
     }
 
-    public boolean missed(Reminder reminder) {
+    public boolean missed(ReminderDTO reminder) {
         boolean missed = false;
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime deadLine = ZonedDateTime.from(reminder.getDeadline().toInstant()).plusHours(24);
@@ -99,33 +105,23 @@ public class ReminderApp {
         return missed;
     }
 
-    public ResponseDTO<Reminder> updateStatus(String id, int status) {
-        ResponseDTO<Reminder> response;
+    public ResponseDTO<ReminderDTO> updateStatus(String id, int status) {
+        ResponseDTO<ReminderDTO> response;
 
         try {
             Reminder reminder = reminderService.get(id);
             reminder.setStatus(status);
-            if (!this.isValid(reminder)) {
+            ReminderDTO dto = reminderMapper.asDto(reminder);
+            if (!dto.validate()) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "");
             }
             reminderService.addOrUpdate(reminder);
-            response = new ResponseDTO<>(reminder, 200, "Reminder status updated");
+            response = new ResponseDTO<>(dto, 200, "Reminder status updated");
             log.info("Reminder status updated");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, 500, "Server Error updating reminder: " + e.getMessage());
         }
         return response;
-    }
-
-    private boolean isValid(Reminder reminder) {
-        if (reminder.getStatus() != -1 && reminder.getStatus() != 0 && reminder.getStatus() != 1) {
-            return false;
-        }
-        String aClass = reminder.getPenaltySetting().get_class();
-        if (Arrays.stream(Penalties.values()).noneMatch(penalty -> penalty.toString().equals(aClass))) {
-            return false;
-        }
-        return true;
     }
 }
