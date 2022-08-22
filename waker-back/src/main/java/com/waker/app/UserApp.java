@@ -25,6 +25,7 @@ public class UserApp {
         try {
             String id = this.userService.addOrUpdate(user);
             response = new ResponseDTO<>(user, 200, "User saved");
+            log.info("User saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, 500, "Server Error adding new user: " + e.getMessage());

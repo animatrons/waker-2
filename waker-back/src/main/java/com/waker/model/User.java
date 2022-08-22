@@ -20,8 +20,11 @@ public class User extends AModel {
     private String email;
     private String password;
     private String country;
+    private Address address;
     private Date birthDay;
     private String phone;
+//    private String stripeCustomerId;
+    private String token;
 
     @Override
     public String getCollectionName() {
