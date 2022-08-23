@@ -3,8 +3,8 @@ package com.waker.web.auth;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.waker.app.UserApp;
-import com.waker.model.User;
 import com.waker.model.dto.ResponseDTO;
+import com.waker.model.dto.UserDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,8 +23,8 @@ public class RegisterUserServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.addHeader("Content-Type", "application/json");
         JsonReader jsonReader = new JsonReader(req.getReader());
-        User user = gson.fromJson(jsonReader, User.class);
-        ResponseDTO<User> response = this.app.register(user);
+        UserDTO user = gson.fromJson(jsonReader, UserDTO.class);
+        ResponseDTO<UserDTO> response = this.app.register(user);
         resp.getWriter().println(gson.toJson(response));
     }
 }

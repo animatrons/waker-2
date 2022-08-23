@@ -2,6 +2,8 @@ package com.waker.app;
 
 import com.waker.model.User;
 import com.waker.model.dto.ResponseDTO;
+import com.waker.model.dto.UserDTO;
+import com.waker.model.dto.mapper.UserMapperImpl;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
 import com.waker.service.IUserService;
@@ -19,12 +21,15 @@ public class UserApp {
         return instance;
     }
     IUserService userService = UserService.getInstance();
+    UserMapperImpl userMapper = new UserMapperImpl();
 
-    public ResponseDTO<User> register(User user) {
-        ResponseDTO<User> response;
+    public ResponseDTO<UserDTO> register(UserDTO userDto) {
+        ResponseDTO<UserDTO> response;
         try {
+            User user = userMapper.asEntity(userDto);
             String id = this.userService.addOrUpdate(user);
-            response = new ResponseDTO<>(user, 200, "User saved");
+            userDto.setKey(id);
+            response = new ResponseDTO<>(userDto, 200, "User saved");
             log.info("User saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
