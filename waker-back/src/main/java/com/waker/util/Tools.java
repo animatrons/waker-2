@@ -1,6 +1,9 @@
 package com.waker.util;
 
 
+import com.waker.model.exception.BusinessErrorCodesAndMessages;
+import com.waker.model.exception.BusinessException;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -9,6 +12,12 @@ public class Tools {
 
     public static String encode(byte[] bytes) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+    public static String encode(Object obj) {
+        return encode(obj.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    public static String decode(String encodedString) {
+        return new String(Base64.getUrlDecoder().decode(encodedString));
     }
     /**
      * Converts a string of hexadecimal characters into a byte array.
@@ -77,5 +86,12 @@ public class Tools {
         for (int i = 0; i < a.length && i < b.length; i++)
             diff |= a[i] ^ b[i];
         return diff == 0;
+    }
+
+    public static String resolveToken(String header) throws BusinessException {
+        if (header.startsWith("Bearer")) {
+            return header.substring(7);
+        }
+        throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Invalid token format");
     }
 }

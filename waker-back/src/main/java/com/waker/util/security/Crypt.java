@@ -1,5 +1,7 @@
 package com.waker.util.security;
 
+import com.waker.model.exception.TechnicalErrorCodesAndMessages;
+import com.waker.model.exception.TechnicalException;
 import com.waker.util.Tools;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,12 +30,21 @@ public class Crypt {
      * @param key secret key byte array
      * @return signed string
      */
-    public static String hmacSHA256(String data, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
-        Mac mac = Mac.getInstance(SIGNING_ALGORITHM);
-        SecretKeySpec keySpec = new SecretKeySpec(key, SIGNING_ALGORITHM);
-        mac.init(keySpec);
-        byte[] signedBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return Tools.encode(signedBytes);
+    public static String hmacSHA256(String data, byte[] key) throws TechnicalException {
+        try {
+            Mac mac = null;
+            mac = Mac.getInstance(SIGNING_ALGORITHM);
+            SecretKeySpec keySpec = new SecretKeySpec(key, SIGNING_ALGORITHM);
+            mac.init(keySpec);
+            byte[] signedBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            return Tools.encode(signedBytes);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new TechnicalException(TechnicalErrorCodesAndMessages.ENCRYPTION_ERROR, e.getMessage());
+        }
+    }
+
+    public static String getSigningAlgorithm() {
+        return SIGNING_ALGORITHM;
     }
 
     /**
@@ -42,8 +53,26 @@ public class Crypt {
      * @param password password string
      * @return hash
      */
-    public static String createHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return createHash(password.toCharArray());
+    public static String createHash(String password) throws TechnicalException {
+        try {
+            return createHash(password.toCharArray());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new TechnicalException(TechnicalErrorCodesAndMessages.ENCRYPTION_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Validates string of password
+     * @param password password to validate
+     * @param goodHash password to validate
+     * @return true if valid, false if not
+     */
+    public static boolean validatePassword(String password, String goodHash) throws TechnicalException {
+        try {
+            return validatePassword(password.toCharArray(), goodHash);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new TechnicalException(TechnicalErrorCodesAndMessages.ENCRYPTION_ERROR, e.getMessage());
+        }
     }
 
     /**
@@ -78,15 +107,7 @@ public class Crypt {
         return skf.generateSecret(spec).getEncoded();
     }
 
-    /**
-     * Validates string of password
-     * @param password password to validate
-     * @param goodHash password to validate
-     * @return true if valid, false if not
-     */
-    public static boolean validatePassword(String password, String goodHash) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return validatePassword(password.toCharArray(), goodHash);
-    }
+
 
     /**
      * Validates char representation of password

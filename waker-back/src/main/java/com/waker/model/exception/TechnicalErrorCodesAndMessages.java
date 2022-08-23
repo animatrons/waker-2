@@ -8,6 +8,11 @@ public enum TechnicalErrorCodesAndMessages {
             return "UNDEFINED TECHNICAL EXCEPTION";
         }
     },
+    ENCRYPTION_ERROR(500) {
+        public String toString() {
+            return "ERROR ENCRYPTING OR DECRYPTING";
+        }
+    },
     DATABASE_ERROR(500) {
         public String toString() {
             return "DATABASE ERROR";
