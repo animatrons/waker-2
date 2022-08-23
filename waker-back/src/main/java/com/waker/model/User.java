@@ -24,7 +24,6 @@ public class User extends AModel {
     private Date birthDay;
     private String phone;
 //    private String stripeCustomerId;
-    private String token;
 
     @Override
     public String getCollectionName() {

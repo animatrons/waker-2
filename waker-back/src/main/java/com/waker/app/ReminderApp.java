@@ -8,7 +8,6 @@ import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
 import com.waker.model.penalty.APenalty;
-import com.waker.model.penalty.Penalties;
 import com.waker.service.IReminderService;
 import com.waker.service.impl.ReminderService;
 import lombok.extern.slf4j.Slf4j;

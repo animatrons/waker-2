@@ -24,19 +24,23 @@ public class UserApp {
         return instance;
     }
     IUserService userService = UserService.getInstance();
+
+    // Mapper implementations are auto generated after compiling
     UserMapperImpl userMapper = new UserMapperImpl();
 
     public ResponseDTO<UserDTO> register(UserDTO userDto) {
         ResponseDTO<UserDTO> response;
         try {
             if (!userDto.validate()) {
-                throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some fields are either missing or not valid.");
+                throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some required fields are either missing or not valid.");
             }
-            if (this.userExists(userDto.getEmail())) {
+            if (userService.emailExists(userDto.getEmail())) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.ALREADY_EXISTS, "Email is used by one of our clients.");
             }
-            User user = userMapper.asEntity(userDto);
-            String id = this.userService.addOrUpdate(user);
+            String hashedPassword = userService.createHash(userDto.getPassword());
+            userDto.setPassword(hashedPassword);
+            String id = userService.addOrUpdate(
+                    userMapper.asEntity(userDto));
             userDto.setKey(id);
             response = new ResponseDTO<>(userDto, 201, "User saved");
             log.info("User saved");
@@ -47,13 +51,32 @@ public class UserApp {
         return response;
     }
 
-    private boolean userExists(String email) {
+    public ResponseDTO<UserDTO> login(UserDTO userDto) {
+        ResponseDTO<UserDTO> response = null;
         try {
-            List<User> users = userService.search("{}", new Object[] {email}, null, null, 1, 0);
-            if (users.size() > 0) return true;
-        } catch (TechnicalException | BusinessException e) {
+            if (!userDto.validateOnLogin()) {
+                throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some required fields are either missing or not valid.");
+            }
+            if (!userService.emailExists(userDto.getEmail())) {
+                throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "User is not registered.");
+            }
+            String email = userDto.getEmail();
+            User savedUser = userService.getByEmail(email);
+            String passwordHash = savedUser.getPassword();
+            boolean isPasswordValid = userService.validatePassword(userDto.getPassword(), passwordHash);
+            if (!isPasswordValid) {
+                throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid password.");
+            }
+            userDto.setPassword("");
+            savedUser = null;
+            String token = userService.buildToken(userMapper.asEntity(userDto));
+            userDto.setToken(token);
+            response = new ResponseDTO<>(userDto, 200, "Login successful");
+        } catch (BusinessException | TechnicalException e) {
             log.error(e.getMessage(), e);
+            response = new ResponseDTO<>(null, e.getCode(), "Error login user: " + e.getMessage());
         }
-        return false;
+        return response;
     }
+
 }

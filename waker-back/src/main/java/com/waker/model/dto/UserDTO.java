@@ -25,4 +25,8 @@ public class UserDTO extends ADto {
         return firstName != null && !firstName.equals("") && lastName != null && !lastName.equals("") && email != null && !email.equals("")
                 && password != null && !password.equals("");
     }
+
+    public boolean validateOnLogin() {
+        return email != null && !email.equals("") && password != null && !password.equals("");
+    }
 }
