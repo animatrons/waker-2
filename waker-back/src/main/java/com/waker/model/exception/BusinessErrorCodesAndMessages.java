@@ -39,7 +39,7 @@ public enum BusinessErrorCodesAndMessages {
             return "FORBIDDEN";
         }
     },
-    ALREADY_EXISTS(406) {
+    ALREADY_EXISTS(409) {
         public String toString() {
             return "RESOURCE ALREADY EXISTS, CANNOT OVERRIDE";
         }

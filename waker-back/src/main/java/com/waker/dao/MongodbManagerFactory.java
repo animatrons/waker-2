@@ -3,7 +3,7 @@ package com.waker.dao;
 import com.mongodb.*;
 import com.waker.model.exception.TechnicalErrorCodesAndMessages;
 import com.waker.model.exception.TechnicalException;
-import com.waker.utils.ConfigProperties;
+import com.waker.util.ConfigProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.jongo.Jongo;
 
@@ -40,7 +40,7 @@ public class MongodbManagerFactory {
                 db = client.getDB(domain);
                 jongo = new Jongo(db);
             } catch (TechnicalException e) {
-                log.error(e.getCode(), e.getMessage(), e);
+                log.error(e.getMessage(), e);
             }
         }
 
