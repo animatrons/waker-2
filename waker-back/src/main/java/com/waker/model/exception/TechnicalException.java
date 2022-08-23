@@ -5,25 +5,25 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TechnicalException extends Exception {
+public class TechnicalException extends GeneralException {
 
-    private String code;
+    private int code;
     private String message;
     public TechnicalException() {
         super();
     }
     public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages) {
         super(codesAndMessages.toString());
-        this.code = codesAndMessages.name();
+        this.code = codesAndMessages.getCode();
         this.message = codesAndMessages.toString();
     }
 
     public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages, String info) {
         super(codesAndMessages.toString() + "  \n  " + info);
-        this.code = codesAndMessages.name();
+        this.code = codesAndMessages.getCode();
         this.message = codesAndMessages.toString() + "  \n  " + info;
     }
-    public TechnicalException(String code, String message) {
+    public TechnicalException(int code, String message) {
         super(message);
         this.code = code;
         this.message = message;

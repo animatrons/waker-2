@@ -1,8 +1,13 @@
 package com.waker.model.exception;
 
-public class BusinessException extends Exception {
+import lombok.Getter;
+import lombok.Setter;
 
-    private String code;
+@Getter
+@Setter
+public class BusinessException extends GeneralException {
+
+    private int code;
     private String message;
 
     public BusinessException() {
@@ -11,15 +16,15 @@ public class BusinessException extends Exception {
 
     public BusinessException(BusinessErrorCodesAndMessages codesAndMessages) {
         super(codesAndMessages.toString());
-        this.code = codesAndMessages.name();
+        this.code = codesAndMessages.getCode();
         this.message = codesAndMessages.toString();
     }
     public BusinessException(BusinessErrorCodesAndMessages codesAndMessages, String info) {
         super(codesAndMessages.toString() + "\n" + info);
-        this.code = codesAndMessages.name();
+        this.code = codesAndMessages.getCode();
         this.message = codesAndMessages.toString() + "\n" + info;
     }
-    public BusinessException(String code, String message) {
+    public BusinessException(int code, String message) {
         super(message);
         this.code = code;
         this.message = message;
