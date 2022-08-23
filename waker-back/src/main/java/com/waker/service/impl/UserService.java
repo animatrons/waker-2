@@ -98,7 +98,7 @@ public class UserService extends BaseService<User, UserDao> implements IUserServ
         long expirationDate = payloadObj.get("exp").getAsLong();
         String newSignature = Crypt.hmacSHA256(payload, SECRET_KEY);
 
-        return signature.equals(newSignature) && now > expirationDate;
+        return signature.equals(newSignature) && now < expirationDate;
     }
 
     @Override
