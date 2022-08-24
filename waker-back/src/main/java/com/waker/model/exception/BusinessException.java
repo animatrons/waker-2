@@ -20,9 +20,9 @@ public class BusinessException extends GeneralException {
         this.message = codesAndMessages.toString();
     }
     public BusinessException(BusinessErrorCodesAndMessages codesAndMessages, String info) {
-        super(codesAndMessages.toString() + "\n" + info);
+        super(codesAndMessages.toString() + "  [[" + info + "]]");
         this.code = codesAndMessages.getCode();
-        this.message = codesAndMessages.toString() + "\n" + info;
+        this.message = codesAndMessages.toString() + "  [[" + info + "]]";
     }
     public BusinessException(int code, String message) {
         super(message);

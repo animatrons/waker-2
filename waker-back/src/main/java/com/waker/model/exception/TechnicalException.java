@@ -19,9 +19,9 @@ public class TechnicalException extends GeneralException {
     }
 
     public TechnicalException(TechnicalErrorCodesAndMessages codesAndMessages, String info) {
-        super(codesAndMessages.toString() + "  \n  " + info);
+        super(codesAndMessages.toString()  + "  [[" + info + "]]");
         this.code = codesAndMessages.getCode();
-        this.message = codesAndMessages.toString() + "  \n  " + info;
+        this.message = codesAndMessages.toString() + "  [[" + info + "]]";
     }
     public TechnicalException(int code, String message) {
         super(message);
