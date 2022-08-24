@@ -26,5 +26,6 @@ public class RegisterUserServlet extends HttpServlet {
         UserDTO user = gson.fromJson(jsonReader, UserDTO.class);
         ResponseDTO<UserDTO> response = this.app.register(user);
         resp.getWriter().println(gson.toJson(response));
+        resp.setStatus(response.getStatus());
     }
 }

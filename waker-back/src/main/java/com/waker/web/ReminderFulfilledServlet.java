@@ -24,5 +24,6 @@ public class ReminderFulfilledServlet extends HttpServlet {
         String id = req.getParameter("id");
         ResponseDTO<ReminderDTO> response = app.updateStatus(id, 1);
         resp.getWriter().println(gson.toJson(response));
+        resp.setStatus(response.getStatus());
     }
 }

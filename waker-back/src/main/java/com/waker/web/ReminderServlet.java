@@ -35,6 +35,7 @@ public class ReminderServlet extends HttpServlet {
         ReminderDTO reminderDto = gson.fromJson(jsonReader, ReminderDTO.class);
         ResponseDTO<ReminderDTO> response = app.save(reminderDto);
         resp.getWriter().println(gson.toJson(response));
+        resp.setStatus(response.getStatus());
     }
 
     @Override
@@ -43,5 +44,6 @@ public class ReminderServlet extends HttpServlet {
         String id = req.getParameter("id");
         ResponseDTO<ReminderDTO> response = app.get(id);
         resp.getWriter().println(gson.toJson(response));
+        resp.setStatus(response.getStatus());
     }
 }

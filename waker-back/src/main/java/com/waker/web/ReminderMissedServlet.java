@@ -24,5 +24,6 @@ public class ReminderMissedServlet extends HttpServlet {
         String id = req.getParameter("id");
         ResponseDTO<ReminderDTO> response = app.takeAction(true, id);
         resp.getWriter().println(gson.toJson(response));
+        resp.setStatus(response.getStatus());
     }
 }
