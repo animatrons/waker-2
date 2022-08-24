@@ -22,6 +22,11 @@ public enum TechnicalErrorCodesAndMessages {
         public String toString() {
             return "DATABASE ENVIRONMENT VARIABLES NOT DEFINED, PLEASE SET THEM";
         }
+    },
+    INVALID_ENVIRONMENT_VARIABLE(500) {
+        public String toString() {
+            return "ENVIRONMENT VARIABLES NOT DEFINED CORRECTLY";
+        }
     };
     private final int code;
     TechnicalErrorCodesAndMessages(int code) {

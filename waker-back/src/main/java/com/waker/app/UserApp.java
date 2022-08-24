@@ -45,6 +45,10 @@ public class UserApp {
             userDto.setKey(id);
             userDto.setPassword("");
             response = new ResponseDTO<>(userDto, 201, "User registered with success");
+            // TODO: send confirmation email
+            // TODO: send confirmation email with html template
+            // TODO: send email verification when user registers
+
             log.debug("User saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
