@@ -27,7 +27,6 @@ public class ReminderServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.addHeader("Content-Type", "application/json");
         gsonBuilder
                 .registerTypeAdapter(ReminderDTO.class, new ReminderJsonAdapter());
         gson = gsonBuilder.create();

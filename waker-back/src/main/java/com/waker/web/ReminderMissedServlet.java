@@ -20,7 +20,6 @@ public class ReminderMissedServlet extends HttpServlet {
     Gson gson = new Gson();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.addHeader("Content-Type", "application/json");
         String id = req.getParameter("id");
         ResponseDTO<ReminderDTO> response = app.takeAction(true, id);
         resp.getWriter().println(gson.toJson(response));

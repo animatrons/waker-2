@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 
-@Slf4j
 @WebFilter("/auth/*")
 public class AuthFilter implements Filter {
 
@@ -26,7 +25,6 @@ public class AuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        response.setHeader("Content-Type", "application/json");
         response.setHeader("Content-Type", "application/json");
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", " GET, OPTIONS, HEAD, PUT, POST, DELETE");
@@ -42,7 +40,7 @@ public class AuthFilter implements Filter {
         if (userLoggedIn || authorizedRequest) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            servletResponse.getWriter().println(validationResponse);
+            servletResponse.getWriter().println(gson.toJson(validationResponse));
             ((HttpServletResponse) servletResponse).setStatus(validationResponse.getStatus());
         }
     }
