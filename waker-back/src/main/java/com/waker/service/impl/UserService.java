@@ -92,7 +92,7 @@ public class UserService extends BaseService<User, UserDao> implements IUserServ
         }
         JsonObject payloadObj = JsonParser.parseString(payload).getAsJsonObject();
         if (payloadObj == null || !payloadObj.has("exp") || !payloadObj.has("sub")) {
-            throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid token format");
+            throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid token payload");
         }
         long now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long expirationDate = payloadObj.get("exp").getAsLong();

@@ -9,6 +9,7 @@ import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
 import com.waker.service.IUserService;
 import com.waker.service.impl.UserService;
+import com.waker.util.Tools;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class UserApp {
                     userMapper.asEntity(userDto));
             userDto.setKey(id);
             response = new ResponseDTO<>(userDto, 201, "User saved");
-            log.info("User saved");
+            log.debug("User saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, e.getCode(), "Error registering user: " + e.getMessage());
@@ -52,7 +53,7 @@ public class UserApp {
     }
 
     public ResponseDTO<UserDTO> login(UserDTO userDto) {
-        ResponseDTO<UserDTO> response = null;
+        ResponseDTO<UserDTO> response;
         try {
             if (!userDto.validateOnLogin()) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some required fields are either missing or not valid.");
@@ -68,13 +69,31 @@ public class UserApp {
                 throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid password.");
             }
             userDto.setPassword("");
-            savedUser = null;
+            savedUser.setPassword("");
             String token = userService.buildToken(userMapper.asEntity(userDto));
             userDto.setToken(token);
             response = new ResponseDTO<>(userDto, 200, "Login successful");
+            log.debug("User just logged in");
         } catch (BusinessException | TechnicalException e) {
             log.error(e.getMessage(), e);
             response = new ResponseDTO<>(null, e.getCode(), "Error login user: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public ResponseDTO<Boolean> validateRequest(String tokenHeader) {
+        ResponseDTO<Boolean> response;
+        try {
+            String token = Tools.resolveToken(tokenHeader);
+            boolean isValid = userService.validateToken(token);
+            if (isValid) {
+                response = new ResponseDTO<>(true, 200, "Access authorize ");
+            } else {
+                throw new BusinessException(BusinessErrorCodesAndMessages.UNAUTHORIZED, "Token is invalid");
+            }
+        } catch (BusinessException | TechnicalException e) {
+            log.error(e.getMessage(), e);
+            response = new ResponseDTO<>(false, e.getCode(), "UNAUTHORIZED REQUEST: " + e.getMessage());
         }
         return response;
     }
