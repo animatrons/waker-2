@@ -89,9 +89,9 @@ public class Tools {
     }
 
     public static String resolveToken(String header) throws BusinessException {
-        if (header.startsWith("Bearer")) {
+        if (header != null && header.startsWith("Bearer")) {
             return header.substring(7);
         }
-        throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Invalid token format");
+        throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, " Invalid token format ");
     }
 }

@@ -43,7 +43,8 @@ public class UserApp {
             String id = userService.addOrUpdate(
                     userMapper.asEntity(userDto));
             userDto.setKey(id);
-            response = new ResponseDTO<>(userDto, 201, "User saved");
+            userDto.setPassword("");
+            response = new ResponseDTO<>(userDto, 201, "User registered with success");
             log.debug("User saved");
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
@@ -87,9 +88,9 @@ public class UserApp {
             String token = Tools.resolveToken(tokenHeader);
             boolean isValid = userService.validateToken(token);
             if (isValid) {
-                response = new ResponseDTO<>(true, 200, "Access authorize ");
+                response = new ResponseDTO<>(true, 200, "Access authorized ");
             } else {
-                throw new BusinessException(BusinessErrorCodesAndMessages.UNAUTHORIZED, "Token is invalid");
+                response = new ResponseDTO<>(false, 401, "UNAUTHORIZED REQUEST: invalid token ");
             }
         } catch (BusinessException | TechnicalException e) {
             log.error(e.getMessage(), e);
