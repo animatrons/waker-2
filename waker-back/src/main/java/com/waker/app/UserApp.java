@@ -3,7 +3,9 @@ package com.waker.app;
 import com.waker.model.User;
 import com.waker.model.dto.ResponseDTO;
 import com.waker.model.dto.UserDTO;
+import com.waker.model.dto.UserOutputDTO;
 import com.waker.model.dto.mapper.UserMapperImpl;
+import com.waker.model.dto.mapper.UserOutputMapperImpl;
 import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
@@ -28,6 +30,7 @@ public class UserApp {
 
     // Mapper implementations are auto generated after compiling
     UserMapperImpl userMapper = new UserMapperImpl();
+    UserOutputMapperImpl outputMapper = new UserOutputMapperImpl();
 
     public ResponseDTO<UserDTO> register(UserDTO userDto) {
         ResponseDTO<UserDTO> response;
@@ -57,8 +60,8 @@ public class UserApp {
         return response;
     }
 
-    public ResponseDTO<UserDTO> login(UserDTO userDto) {
-        ResponseDTO<UserDTO> response;
+    public ResponseDTO<UserOutputDTO> login(UserDTO userDto) {
+        ResponseDTO<UserOutputDTO> response;
         try {
             if (!userDto.validateOnLogin()) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some required fields are either missing or not valid.");
@@ -73,11 +76,10 @@ public class UserApp {
             if (!isPasswordValid) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid password.");
             }
-            userDto.setPassword("");
-            savedUser.setPassword("");
             String token = userService.buildToken(userMapper.asEntity(userDto));
-            userDto.setToken(token);
-            response = new ResponseDTO<>(userDto, 200, "Login successful");
+            UserOutputDTO outputDTO = outputMapper.asDto(userDto);
+            outputDTO.setAccessToken(token);
+            response = new ResponseDTO<>(outputDTO, 200, "Login successful");
             log.debug("User just logged in");
         } catch (BusinessException | TechnicalException e) {
             log.error(e.getMessage(), e);
