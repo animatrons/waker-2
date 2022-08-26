@@ -13,6 +13,6 @@ public interface IUserService extends IBaseService<User> {
     String createHash(String password) throws TechnicalException;
     boolean validatePassword(String password, String goodHash) throws TechnicalException;
     String buildToken(User use) throws TechnicalException;
-    boolean validateToken(String token) throws BusinessException, TechnicalException;
+    boolean validateToken(String token) throws TechnicalException;
     boolean emailExists(String email) throws BusinessException, TechnicalException;
 }

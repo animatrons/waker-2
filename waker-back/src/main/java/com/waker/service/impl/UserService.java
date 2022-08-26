@@ -79,20 +79,23 @@ public class UserService extends BaseService<User, UserDao> implements IUserServ
     }
 
     @Override
-    public boolean validateToken(String token) throws BusinessException, TechnicalException {
+    public boolean validateToken(String token) throws TechnicalException {
+        if (token == null || token.equals("")) {
+            return false;
+        }
         String[] parts = token.split("\\.");
         if (parts.length != 3) {
-            throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid token format");
+            return false;
         }
         String encodedHeader = parts[0];
         String payload = Tools.decode(parts[1]);
         String signature = parts[2];
         if (!encodedHeader.equals(ENCODED_HEADER)) {
-            throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid token header");
+            return false;
         }
         JsonObject payloadObj = JsonParser.parseString(payload).getAsJsonObject();
         if (payloadObj == null || !payloadObj.has("exp") || !payloadObj.has("sub")) {
-            throw new BusinessException(BusinessErrorCodesAndMessages.LOGIN_ERROR, "Invalid token payload");
+            return false;
         }
         long now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long expirationDate = payloadObj.get("exp").getAsLong();

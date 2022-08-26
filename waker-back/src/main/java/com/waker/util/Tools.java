@@ -88,10 +88,10 @@ public class Tools {
         return diff == 0;
     }
 
-    public static String resolveToken(String header) throws BusinessException {
+    public static String resolveToken(String header) {
         if (header != null && header.startsWith("Bearer")) {
             return header.substring(7);
         }
-        throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, " Invalid token format ");
+        return null;
     }
 }
