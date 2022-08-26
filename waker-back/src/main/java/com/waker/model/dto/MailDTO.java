@@ -1,12 +1,12 @@
 package com.waker.model.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class MailDTO {
 
     private String mailFrom;
@@ -16,4 +16,9 @@ public class MailDTO {
     private String subject;
     private String text;
     private String html;
+
+    /*public MailDTO(String mailFrom, String mailFromName,
+                   String mailTo, String mailToName, String subject, String text, String html) {
+
+    }*/
 }
