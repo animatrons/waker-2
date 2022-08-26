@@ -1,6 +1,7 @@
 package com.waker.app;
 
 import com.waker.model.User;
+import com.waker.model.dto.MailDTO;
 import com.waker.model.dto.ResponseDTO;
 import com.waker.model.dto.UserDTO;
 import com.waker.model.dto.UserOutputDTO;
@@ -9,12 +10,18 @@ import com.waker.model.dto.mapper.UserOutputMapperImpl;
 import com.waker.model.exception.BusinessErrorCodesAndMessages;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
+import com.waker.service.IMailServiceProvider;
+import com.waker.service.ITemplatingService;
 import com.waker.service.IUserService;
+import com.waker.service.impl.HandlebarsTemplatingService;
+import com.waker.service.impl.MailSlurpService;
 import com.waker.service.impl.UserService;
 import com.waker.util.Tools;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class UserApp {
@@ -31,6 +38,8 @@ public class UserApp {
     // Mapper implementations are auto generated after compiling
     UserMapperImpl userMapper = new UserMapperImpl();
     UserOutputMapperImpl outputMapper = new UserOutputMapperImpl();
+    IMailServiceProvider mailService = MailSlurpService.getInstance();
+    ITemplatingService templatingService = HandlebarsTemplatingService.getInstance();
 
     public ResponseDTO<UserDTO> register(UserDTO userDto) {
         ResponseDTO<UserDTO> response;
@@ -43,18 +52,23 @@ public class UserApp {
             }
             String hashedPassword = userService.createHash(userDto.getPassword());
             userDto.setPassword(hashedPassword);
-            String id = userService.addOrUpdate(
-                    userMapper.asEntity(userDto));
+            String id = userService.addOrUpdate(userMapper.asEntity(userDto));
             userDto.setKey(id);
             userDto.setPassword("");
             response = new ResponseDTO<>(userDto, 201, "User registered with success");
-            // TODO: send confirmation email
-            // TODO: send confirmation email with html template
+
+            Map<String, UserDTO> tempMap = new HashMap<>();
+            tempMap.put("", userDto);
+            String html = templatingService.render(tempMap, "email_templates/user_registration_confirmation_email.hbs");
+            MailDTO mail = new MailDTO(mailService.getMainEmail(), "Waker Team",
+                    userDto.getEmail(), userDto.getFirstName() + " " + userDto.getLastName(), "Registration", "", html);
+            ResponseDTO<MailDTO> mailStatusResponse = mailService.send(mail, true);
             // TODO: send email verification when user registers
 
-            log.debug("User saved");
+            log.info("User saved");
+            log.info("Confirmation email status: {}", mailStatusResponse.toString());
         } catch (TechnicalException | BusinessException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
             response = new ResponseDTO<>(null, e.getCode(), "Error registering user: " + e.getMessage());
         }
         return response;
@@ -80,9 +94,9 @@ public class UserApp {
             UserOutputDTO outputDTO = outputMapper.asDto(userDto);
             outputDTO.setAccessToken(token);
             response = new ResponseDTO<>(outputDTO, 200, "Login successful");
-            log.debug("User just logged in");
+            log.info("User just logged in");
         } catch (BusinessException | TechnicalException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
             response = new ResponseDTO<>(null, e.getCode(), "Error login user: " + e.getMessage());
         }
         return response;
@@ -98,9 +112,9 @@ public class UserApp {
             } else {
                 response = new ResponseDTO<>(false, 401, "UNAUTHORIZED REQUEST: invalid token ");
             }
-        } catch (BusinessException | TechnicalException e) {
+        } catch (TechnicalException e) {
             log.error(e.getMessage(), e);
-            response = new ResponseDTO<>(false, e.getCode(), "UNAUTHORIZED REQUEST: " + e.getMessage());
+            response = new ResponseDTO<>(false, e.getCode(), "A technical error occurred while validating the token: " + e.getMessage());
         }
         return response;
     }
