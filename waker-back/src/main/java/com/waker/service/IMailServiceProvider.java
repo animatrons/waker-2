@@ -4,9 +4,10 @@ import com.waker.model.dto.MailDTO;
 import com.waker.model.dto.ResponseDTO;
 import com.waker.model.exception.BusinessException;
 import com.waker.model.exception.TechnicalException;
+import lombok.NonNull;
 
 public interface IMailServiceProvider {
 
-    ResponseDTO<MailDTO> send(MailDTO mailDto, Boolean fromUs) throws TechnicalException, BusinessException;
+    ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs) throws TechnicalException, BusinessException;
     String getMainEmail();
 }
