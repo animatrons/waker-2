@@ -11,5 +11,5 @@ public interface IMailServiceProvider {
     ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs);
     String getMainEmail();
 
-    ResponseDTO<?> init();
+    ResponseDTO<?> test();
 }

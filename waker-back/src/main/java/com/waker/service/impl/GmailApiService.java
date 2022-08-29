@@ -50,13 +50,7 @@ public class GmailApiService implements IMailServiceProvider {
 
     private static GmailApiService instance = null;
     private static Credential credential = null;
-    private GmailApiService() {
-        /*try {
-            credentials = getCredentials();
-        } catch (IOException | GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        }*/
-    }
+    private GmailApiService() {}
     public static GmailApiService getInstance() {
         if (instance == null)
             instance = new GmailApiService();
@@ -83,8 +77,9 @@ public class GmailApiService implements IMailServiceProvider {
      */
     private static final List<String> SCOPES = List.of(GmailScopes.GMAIL_LABELS, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_METADATA);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-    private static final String SERVICE_ACCOUNT_KEY_FILE_PATH = "/service-account-key.json";
     private static final String SERVICE_ACCOUNT_KEY_P12FILE_PATH = "/service-account.p12";
+    private static final String SERVICE_ACCOUNT_EMAIL = "amin-house@appspot.gserviceaccount.com";
+    private static final String WORKSPACE_DOMAIN_EMAIL = "aming@qwaker.co";
 
     /**
      * Creates an authorized Credential object.
@@ -110,9 +105,21 @@ public class GmailApiService implements IMailServiceProvider {
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(7777).build();
         // TODO: add some form of a permanent authorization of the internal gmail account for sending emails
+        // UPDATE: almost did it with getCredentialsFromServiceAccount
         Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
         //returns an authorized Credential object.
         return credential;
+    }
+
+    /**
+     * Creates an authorized Credential object from the end user's info
+     *
+     * @param objDto: dto sent from the front containing auth credentials from the user after giving consent
+     * @return Credential object
+     */
+    private static Credential getCredentialsFromUser(Object objDto) {
+        // TODO later, while i figure out the format of the dto sent by the user
+        return null;
     }
 
     private static Credential getCredentialsFromServiceAccount(final NetHttpTransport HTTP_TRANSPORT) throws TechnicalException {
@@ -128,14 +135,14 @@ public class GmailApiService implements IMailServiceProvider {
             return new  GoogleCredential.Builder()
                     .setTransport(HTTP_TRANSPORT)
                     .setJsonFactory(JSON_FACTORY)
-                    .setServiceAccountId("amin-house@appspot.gserviceaccount.com")
+                    .setServiceAccountId(SERVICE_ACCOUNT_EMAIL)
                     .setServiceAccountScopes(SCOPES)
                     .setServiceAccountPrivateKeyFromP12File(in)
-                    .setServiceAccountUser("aming@qwaker.co")
+                    .setServiceAccountUser(WORKSPACE_DOMAIN_EMAIL)
                     .build();
         } catch (IOException | GeneralSecurityException e) {
             log.error(e.getMessage(), e);
-            throw new TechnicalException(TechnicalErrorCodesAndMessages.UNDEFINED_EXCEPTION, "Man idkj  " + e.getMessage());
+            throw new TechnicalException(TechnicalErrorCodesAndMessages.UNDEFINED_EXCEPTION, "MAN DIS IS SERIOUS  " + e.getMessage());
         }
     }
 
@@ -162,43 +169,8 @@ public class GmailApiService implements IMailServiceProvider {
     private Message createMessageWithEmail(MimeMessage emailContent) throws MessagingException, IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         emailContent.writeTo(buffer);
-
         return new Message()
                 .setRaw(Base64.encodeBase64URLSafeString(buffer.toByteArray()));
-    }
-
-    public ResponseDTO<?> init() {
-        ResponseDTO<?> response;
-        try {
-            final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Credential credential;
-            credential = getCredentialsFromServiceAccount(HTTP_TRANSPORT);
-            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-            String user = "me";
-            /*ListLabelsResponse listResponse = service.users().labels().list(user).execute();
-            List<Label> labels = listResponse.getLabels();*/
-
-            var things = service.users().getProfile(user).execute();
-            Collection<Object> values = things.values();
-            if (values.isEmpty()) {
-                System.out.println("Nothing found.");
-                response = new ResponseDTO<>(null, 500, "No ''things'' found");
-            } else {
-                System.out.println("Things from your gmail:");
-                for (Object value : values) {
-                    System.out.printf("- %s\n", value);
-                    log.info("{} \n", value);
-                }
-                response = new ResponseDTO<>(values, 200, "Whatever this is: ");
-
-            }
-        } catch (IOException | GeneralSecurityException | TechnicalException e) {
-            log.error(e.getMessage(), e);
-            response = new ResponseDTO<>(null, 500, "Error init gmail service: " + e.getMessage());
-        }
-        return response;
     }
 
     @Override
@@ -206,16 +178,16 @@ public class GmailApiService implements IMailServiceProvider {
         ResponseDTO<MailDTO> response;
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Credential credential = getCredentials(HTTP_TRANSPORT);
+            Credential credential = getCredentialsFromServiceAccount(HTTP_TRANSPORT);
             Gmail gmail = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
-            MimeMessage mimeMessage = createEmail(EMAIL_ADDRESS, mailDto.getMailTo(), mailDto.getSubject(), mailDto.getText(), mailDto.getHtml());
+            MimeMessage mimeMessage = createEmail(WORKSPACE_DOMAIN_EMAIL, mailDto.getMailTo(), mailDto.getSubject(), mailDto.getText(), mailDto.getHtml());
             Message message = createMessageWithEmail(mimeMessage);
             List<String> list = gmail.users()
                     .messages()
-                    .send(EMAIL_ADDRESS, message)
+                    .send(WORKSPACE_DOMAIN_EMAIL, message)
                     .execute()
                     .getLabelIds();
             if (!list.contains("SENT")) {
@@ -227,6 +199,36 @@ public class GmailApiService implements IMailServiceProvider {
             response = new ResponseDTO<>(mailDto, 500, "Error sending email using gmail: " + e.getMessage());
         }
 
+        return response;
+    }
+
+    @Override
+    public ResponseDTO<?> test() {
+        ResponseDTO<?> response;
+        try {
+            final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            Credential credential;
+            credential = getCredentialsFromServiceAccount(HTTP_TRANSPORT);
+            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+            String user = "me";
+            var things = service.users().getProfile(user).execute();
+            Collection<Object> values = things.values();
+            if (values.isEmpty()) {
+                System.out.println("Nothing found.");
+                response = new ResponseDTO<>(null, 500, "No ''things'' found");
+            } else {
+                System.out.println("Things from your gmail:");
+                for (Object value : values) {
+                    System.out.printf("- %s\n", value.toString());
+                }
+                response = new ResponseDTO<>(values, 200, "Whatever this is: ");
+            }
+        } catch (IOException | GeneralSecurityException | TechnicalException e) {
+            log.error(e.getMessage(), e);
+            response = new ResponseDTO<>(null, 500, "Error init gmail service: " + e.getMessage());
+        }
         return response;
     }
 

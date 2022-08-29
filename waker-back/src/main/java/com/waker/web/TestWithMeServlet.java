@@ -24,8 +24,8 @@ public class TestWithMeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         JsonReader reader = new JsonReader(req.getReader());
         MailDTO mailDTO = gson.fromJson(reader, MailDTO.class);
-//        ResponseDTO<?> response = mailService.send(mailDTO, true);
-        ResponseDTO<?> response = mailService.init();
+        ResponseDTO<?> response = mailService.send(mailDTO, true);
+//        ResponseDTO<?> response = mailService.test();
         resp.setStatus(response.getStatus());
         resp.getWriter().println(gson.toJson(response));
     }

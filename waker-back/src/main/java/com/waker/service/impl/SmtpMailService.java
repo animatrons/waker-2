@@ -50,7 +50,7 @@ public class SmtpMailService implements IMailServiceProvider {
     }
 
     @Override
-    public ResponseDTO<?> init() {
+    public ResponseDTO<?> test() {
         return null;
     }
 

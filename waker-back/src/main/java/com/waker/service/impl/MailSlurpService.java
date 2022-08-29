@@ -30,6 +30,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+/**
+ * Useless and deprecated service, use the others instead
+ */
 public class MailSlurpService implements IMailServiceProvider {
 
     private MailSlurpService() {}
@@ -119,7 +122,7 @@ public class MailSlurpService implements IMailServiceProvider {
     }
 
     @Override
-    public ResponseDTO<?> init() {
+    public ResponseDTO<?> test() {
         return null;
     }
 
