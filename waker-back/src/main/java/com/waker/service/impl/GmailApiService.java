@@ -225,6 +225,6 @@ public class GmailApiService implements IMailServiceProvider {
 
     @Override
     public String getMainEmail() {
-        return null;
+        return WORKSPACE_DOMAIN_EMAIL;
     }
 }

@@ -37,6 +37,7 @@ public class PostmarkMailService implements IMailServiceProvider {
             ApiClient client = Postmark.getApiClient(API_TOKEN);
             Message message = new Message(EMAIL_ADDRESS, mailDto.getMailTo(), mailDto.getSubject(), mailDto.getHtml());
             message.setMessageStream("outbound");
+
             MessageResponse response = client.deliverMessage(message);
             responseDTO = new ResponseDTO<>(mailDto, 200, "Email sent: " + response.getMessage());
         } catch (TechnicalException | PostmarkException | IOException e) {
