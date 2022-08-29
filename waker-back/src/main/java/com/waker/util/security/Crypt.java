@@ -117,7 +117,7 @@ public class Crypt {
      */
     private static boolean validatePassword(char[] password, String goodHash) throws NoSuchAlgorithmException, InvalidKeySpecException {
         String[] parts = goodHash.split(":");
-        int iterationCount = Integer.getInteger(parts[0]);
+        int iterationCount = Integer.parseInt(parts[0]);
         byte[] salt = Tools.fromHex(parts[1]);
         byte[] hash = Tools.fromHex(parts[2]);
 
