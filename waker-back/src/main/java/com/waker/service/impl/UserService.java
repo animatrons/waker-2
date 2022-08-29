@@ -99,9 +99,26 @@ public class UserService extends BaseService<User, UserDao> implements IUserServ
         }
         long now = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
         long expirationDate = payloadObj.get("exp").getAsLong();
-        String newSignature = Crypt.hmacSHA256(payload, SECRET_KEY);
+        String newSignature = Crypt.hmacSHA256(ENCODED_HEADER + "." + Tools.encode(payload), SECRET_KEY);
 
         return signature.equals(newSignature) && now < expirationDate;
+    }
+
+    @Override
+    public String getSubjectFromToken(String token) throws BusinessException {
+        if (token == null || token.equals("")) {
+            throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Token is empty.");
+        }
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) {
+            throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Token format invalid .");
+        }
+        String payload = Tools.decode(parts[1]);
+        JsonObject payloadObj = JsonParser.parseString(payload).getAsJsonObject();
+        if (!payloadObj.has("sub")) {
+            throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Token format invalid .");
+        }
+        return payloadObj.get("sub").getAsString();
     }
 
     @Override

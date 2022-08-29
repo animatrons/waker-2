@@ -15,4 +15,5 @@ public interface IUserService extends IBaseService<User> {
     String buildToken(User use) throws TechnicalException;
     boolean validateToken(String token) throws TechnicalException;
     boolean emailExists(String email) throws BusinessException, TechnicalException;
+    String getSubjectFromToken(String token) throws BusinessException;
 }

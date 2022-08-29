@@ -6,9 +6,11 @@ import com.waker.model.dto.ResponseDTO;
 import jakarta.servlet.*;
 import jakarta.servlet.Filter;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,12 +34,14 @@ public class AuthFilter implements Filter {
                 "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
 
         String tokenHeader = request.getHeader("Authorization");
-        ResponseDTO<Boolean> validationResponse = userApp.validateRequest(tokenHeader);
-        boolean userLoggedIn = validationResponse.getData();
+        ResponseDTO<String> validationResponse = userApp.validateRequest(tokenHeader);
+        String loggedInUserEmail = validationResponse.getData();
 
         String requestURI = request.getRequestURI();
         boolean authorizedRequest = AUTHORIZED_ROUTES.stream().anyMatch(route -> route.equals(requestURI));
-        if (userLoggedIn || authorizedRequest) {
+        if (!StringUtils.isBlank(loggedInUserEmail) || authorizedRequest) {
+            Cookie cookie = new Cookie("logged-in-user", loggedInUserEmail);
+            response.addCookie(cookie);
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             servletResponse.getWriter().println(gson.toJson(validationResponse));

@@ -13,6 +13,7 @@ import com.waker.model.exception.TechnicalException;
 import com.waker.service.IMailServiceProvider;
 import com.waker.service.ITemplatingService;
 import com.waker.service.IUserService;
+import com.waker.service.impl.GmailApiService;
 import com.waker.service.impl.HandlebarsTemplatingService;
 import com.waker.service.impl.MailSlurpService;
 import com.waker.service.impl.UserService;
@@ -38,7 +39,7 @@ public class UserApp {
     // Mapper implementations are auto generated after compiling
     UserMapperImpl userMapper = new UserMapperImpl();
     UserOutputMapperImpl outputMapper = new UserOutputMapperImpl();
-    IMailServiceProvider mailService = MailSlurpService.getInstance();
+    IMailServiceProvider mailService = GmailApiService.getInstance();
     ITemplatingService templatingService = HandlebarsTemplatingService.getInstance();
 
     public ResponseDTO<UserDTO> register(UserDTO userDto) {
@@ -58,7 +59,7 @@ public class UserApp {
             response = new ResponseDTO<>(userDto, 201, "User registered with success");
 
             Map<String, UserDTO> tempMap = new HashMap<>();
-            tempMap.put("", userDto);
+            tempMap.put("user", userDto);
             String html = templatingService.render(tempMap, "email_templates/user_registration_confirmation_email.hbs");
             MailDTO mail = new MailDTO(mailService.getMainEmail(), "Waker Team",
                     userDto.getEmail(), userDto.getFirstName() + " " + userDto.getLastName(), "Registration", "", html);
@@ -102,19 +103,20 @@ public class UserApp {
         return response;
     }
 
-    public ResponseDTO<Boolean> validateRequest(String tokenHeader) {
-        ResponseDTO<Boolean> response;
+    public ResponseDTO<String> validateRequest(String tokenHeader) {
+        ResponseDTO<String> response;
         try {
             String token = Tools.resolveToken(tokenHeader);
             boolean isValid = userService.validateToken(token);
             if (isValid) {
-                response = new ResponseDTO<>(true, 200, "Access authorized ");
+                String email = userService.getSubjectFromToken(token);
+                response = new ResponseDTO<>(email, 200, "Access authorized ");
             } else {
-                response = new ResponseDTO<>(false, 401, "UNAUTHORIZED REQUEST: invalid token ");
+                response = new ResponseDTO<>(null, 401, "UNAUTHORIZED REQUEST: invalid token ");
             }
-        } catch (TechnicalException e) {
+        } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage(), e);
-            response = new ResponseDTO<>(false, e.getCode(), "A technical error occurred while validating the token: " + e.getMessage());
+            response = new ResponseDTO<>(null, e.getCode(), "A technical error occurred while validating the token: " + e.getMessage());
         }
         return response;
     }

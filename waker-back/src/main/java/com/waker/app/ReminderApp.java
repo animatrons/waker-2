@@ -11,6 +11,7 @@ import com.waker.model.penalty.APenalty;
 import com.waker.service.IReminderService;
 import com.waker.service.impl.ReminderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -54,6 +55,9 @@ public class ReminderApp {
         ResponseDTO<ReminderDTO> response;
 
         try {
+            if (StringUtils.isBlank(id)) {
+                throw new BusinessException(BusinessErrorCodesAndMessages.MISSING_REQUIRED_FIELDS, " No id provided");
+            }
             Reminder reminder = reminderService.get(id);
             ReminderDTO dto = reminderMapper.asDto(reminder);
             response = new ResponseDTO<>(dto, 200, "Reminder found");
