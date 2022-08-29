@@ -22,7 +22,7 @@ public class SmtpMailService implements IMailServiceProvider {
     private static final String OUTLOOK_HOST_NAME = "";
 
     @Override
-    public ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs) throws TechnicalException, BusinessException {
+    public ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs) {
         ResponseDTO<MailDTO> response;
         String sender = mailDto.getMailFrom();
         String recipient = mailDto.getMailTo();
@@ -46,6 +46,11 @@ public class SmtpMailService implements IMailServiceProvider {
 
     @Override
     public String getMainEmail() {
+        return null;
+    }
+
+    @Override
+    public ResponseDTO<?> init() {
         return null;
     }
 

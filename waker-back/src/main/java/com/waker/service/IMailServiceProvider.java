@@ -8,6 +8,8 @@ import lombok.NonNull;
 
 public interface IMailServiceProvider {
 
-    ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs) throws TechnicalException, BusinessException;
+    ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs);
     String getMainEmail();
+
+    ResponseDTO<?> init();
 }

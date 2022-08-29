@@ -118,6 +118,11 @@ public class MailSlurpService implements IMailServiceProvider {
         return DEFAULT_INBOX_EMAIL;
     }
 
+    @Override
+    public ResponseDTO<?> init() {
+        return null;
+    }
+
     private ApiClient getApiClient() throws TechnicalException {
         if (apiClient == null) {
             if (StringUtils.isBlank(API_KEY)) {

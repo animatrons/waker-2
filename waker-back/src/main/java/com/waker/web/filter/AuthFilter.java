@@ -18,7 +18,7 @@ public class AuthFilter implements Filter {
 
     Gson gson = new Gson();
     UserApp userApp = UserApp.getInstance();
-    static final List<String> AUTHORIZED_ROUTES = List.of("/auth/api/registration", "/auth/api/login");
+    static final List<String> AUTHORIZED_ROUTES = List.of("/auth/api/registration", "/auth/api/login", "/auth/api/test");
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
