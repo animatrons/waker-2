@@ -56,30 +56,14 @@ public class GmailApiService implements IMailServiceProvider {
             instance = new GmailApiService();
         return instance;
     }
-
-    private static final String EMAIL_ADDRESS = "amine.med.ma@gmail.com";
-    /**
-     * Application name.
-     */
     private static final String APPLICATION_NAME = "waker-2";
-    /**
-     * Global instance of the JSON factory.
-     */
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    /**
-     * Directory to store authorization tokens for this application.
-     */
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
-
-    /**
-     * Global instance of the scopes required by this quickstart.
-     * If modifying these scopes, delete your previously saved tokens/ folder.
-     */
     private static final List<String> SCOPES = List.of(GmailScopes.GMAIL_LABELS, GmailScopes.GMAIL_SEND, GmailScopes.GMAIL_METADATA);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
     private static final String SERVICE_ACCOUNT_KEY_P12FILE_PATH = "/service-account.p12";
     private static final String SERVICE_ACCOUNT_EMAIL = "amin-house@appspot.gserviceaccount.com";
-    private static final String WORKSPACE_DOMAIN_EMAIL = "aming@qwaker.co";
+    private static final String WORKSPACE_DOMAIN_EMAIL =  System.getenv("SECONDARY_EMAIL_ADDRESS");
 
     /**
      * Creates an authorized Credential object.
@@ -124,6 +108,9 @@ public class GmailApiService implements IMailServiceProvider {
 
     private static Credential getCredentialsFromServiceAccount(final NetHttpTransport HTTP_TRANSPORT) throws TechnicalException {
         try (InputStream in = GmailApiService.class.getResourceAsStream(SERVICE_ACCOUNT_KEY_P12FILE_PATH);) {
+            if (StringUtils.isBlank(WORKSPACE_DOMAIN_EMAIL)) {
+                throw new TechnicalException(TechnicalErrorCodesAndMessages.INVALID_ENVIRONMENT_VARIABLE, " Email address undefined.");
+            }
             if (in == null) {
                 throw new FileNotFoundException("Resource not found: " + SERVICE_ACCOUNT_KEY_P12FILE_PATH);
             }
@@ -176,18 +163,22 @@ public class GmailApiService implements IMailServiceProvider {
     @Override
     public ResponseDTO<MailDTO> send(@NonNull MailDTO mailDto, @NonNull Boolean fromUs) {
         ResponseDTO<MailDTO> response;
+        String sender = WORKSPACE_DOMAIN_EMAIL;
         try {
+            if (StringUtils.isBlank(sender)) {
+                throw new TechnicalException(TechnicalErrorCodesAndMessages.INVALID_ENVIRONMENT_VARIABLE, " Email address undefined.");
+            }
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             Credential credential = getCredentialsFromServiceAccount(HTTP_TRANSPORT);
             Gmail gmail = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
-            MimeMessage mimeMessage = createEmail(WORKSPACE_DOMAIN_EMAIL, mailDto.getMailTo(), mailDto.getSubject(), mailDto.getText(), mailDto.getHtml());
+            MimeMessage mimeMessage = createEmail(sender, mailDto.getMailTo(), mailDto.getSubject(), mailDto.getText(), mailDto.getHtml());
             Message message = createMessageWithEmail(mimeMessage);
             List<String> list = gmail.users()
                     .messages()
-                    .send(WORKSPACE_DOMAIN_EMAIL, message)
+                    .send(sender, message)
                     .execute()
                     .getLabelIds();
             if (!list.contains("SENT")) {
