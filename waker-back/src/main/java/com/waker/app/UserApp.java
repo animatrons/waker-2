@@ -66,8 +66,6 @@ public class UserApp {
             ResponseDTO<MailDTO> mailStatusResponse = mailService.send(mail, true);
             // TODO: send email verification when user registers
 
-            log.info("User saved");
-            log.info("Confirmation email status: {}", mailStatusResponse.toString());
         } catch (TechnicalException | BusinessException e) {
             log.error(e.getMessage());
             response = new ResponseDTO<>(null, e.getCode(), "Error registering user: " + e.getMessage());
@@ -95,7 +93,6 @@ public class UserApp {
             UserOutputDTO outputDTO = outputMapper.asDto(userDto);
             outputDTO.setAccessToken(token);
             response = new ResponseDTO<>(outputDTO, 200, "Login successful");
-            log.info("User just logged in");
         } catch (BusinessException | TechnicalException e) {
             log.error(e.getMessage());
             response = new ResponseDTO<>(null, e.getCode(), "Error login user: " + e.getMessage());

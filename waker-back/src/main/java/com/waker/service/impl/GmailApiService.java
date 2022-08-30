@@ -106,6 +106,17 @@ public class GmailApiService implements IMailServiceProvider {
         return null;
     }
 
+    /**
+     * Creates an authorized Credential object from a service account and
+     * a workspace domain account
+     *
+     * To use service accounts with gmail you need to have a Google Workspace domain account.
+     * Then the admin of your domain will be able to set up domain wide delegation for the service account of the app.
+     * It will only work with domain emails.
+     *
+     * @return Credential object
+     * @throws TechnicalException
+     */
     private static Credential getCredentialsFromServiceAccount(final NetHttpTransport HTTP_TRANSPORT) throws TechnicalException {
         try (InputStream in = GmailApiService.class.getResourceAsStream(SERVICE_ACCOUNT_KEY_P12FILE_PATH);) {
             if (StringUtils.isBlank(WORKSPACE_DOMAIN_EMAIL)) {
@@ -114,11 +125,6 @@ public class GmailApiService implements IMailServiceProvider {
             if (in == null) {
                 throw new FileNotFoundException("Resource not found: " + SERVICE_ACCOUNT_KEY_P12FILE_PATH);
             }
-            /*
-            * To use service accounts with gmail you need to have a Google Workspace domain account.
-            * Then the admin of your domain will be able to set up domain wide delegation for the service account of the app.
-            * It will only work with domain emails.
-             * */
             return new  GoogleCredential.Builder()
                     .setTransport(HTTP_TRANSPORT)
                     .setJsonFactory(JSON_FACTORY)
