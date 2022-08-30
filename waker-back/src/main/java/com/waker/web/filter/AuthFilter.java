@@ -40,8 +40,7 @@ public class AuthFilter implements Filter {
         String requestURI = request.getRequestURI();
         boolean authorizedRequest = AUTHORIZED_ROUTES.stream().anyMatch(route -> route.equals(requestURI));
         if (!StringUtils.isBlank(loggedInUserEmail) || authorizedRequest) {
-            Cookie cookie = new Cookie("logged-in-user", loggedInUserEmail);
-            response.addCookie(cookie);
+            response.addHeader("logged-in-user", loggedInUserEmail);
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             servletResponse.getWriter().println(gson.toJson(validationResponse));
