@@ -76,7 +76,7 @@ public class UserApp {
     public ResponseDTO<UserOutputDTO> login(UserDTO userDto) {
         ResponseDTO<UserOutputDTO> response;
         try {
-            if (!userDto.validateOnLogin()) {
+            if (!userDto.validate("login")) {
                 throw new BusinessException(BusinessErrorCodesAndMessages.INVALID_VALUE_IN_FIELDS, "Some required fields are either missing or not valid.");
             }
             if (!userService.emailExists(userDto.getEmail())) {

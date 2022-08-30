@@ -13,4 +13,9 @@ public class AddressDTO extends ADto {
     public boolean validate() {
         return city != null && !city.equals("") && address1 != null && !address1.equals("");
     }
+
+    @Override
+    public boolean validate(String validationType) {
+        return false;
+    }
 }

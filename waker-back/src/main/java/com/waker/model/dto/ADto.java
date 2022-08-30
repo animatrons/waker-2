@@ -10,4 +10,5 @@ public abstract class ADto {
     private String key;
 
     public abstract boolean validate();
+    public abstract boolean validate(String  validationType);
 }

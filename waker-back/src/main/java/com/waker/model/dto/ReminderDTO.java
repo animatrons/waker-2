@@ -24,9 +24,14 @@ public class ReminderDTO extends ADto {
 
     @Override
     public boolean validate() {
-        return user.validate() && name != null && !name.equals("") && notifyTime != null && deadline != null &&
+        return user.validate("email") && name != null && !name.equals("") && notifyTime != null && deadline != null &&
             notifyTime.before(deadline) && penaltySetting != null && penaltySetting.validate() &&
                 fulfillmentMethod != null && fulfillmentMethod.validate() &&
                     (status == -1 || status == 0 || status == 1);
+    }
+
+    @Override
+    public boolean validate(String validationType) {
+        return false;
     }
 }
