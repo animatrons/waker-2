@@ -21,7 +21,8 @@ public class ReminderMissedServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String id = req.getParameter("id");
-        ResponseDTO<ReminderDTO> response = app.takeAction(true, id);
+        String loggedInUsersEmail = resp.getHeader("logged-in-user");
+        ResponseDTO<ReminderDTO> response = app.takeAction(true, id, loggedInUsersEmail);
         resp.getWriter().println(gson.toJson(response));
         resp.setStatus(response.getStatus());
     }

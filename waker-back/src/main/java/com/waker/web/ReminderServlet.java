@@ -32,7 +32,8 @@ public class ReminderServlet extends HttpServlet {
         gson = gsonBuilder.create();
         JsonReader jsonReader = new JsonReader(req.getReader());
         ReminderDTO reminderDto = gson.fromJson(jsonReader, ReminderDTO.class);
-        ResponseDTO<ReminderDTO> response = app.save(reminderDto);
+        String loggedInUsersEmail = resp.getHeader("logged-in-user");
+        ResponseDTO<ReminderDTO> response = app.save(reminderDto, loggedInUsersEmail);
         resp.getWriter().println(gson.toJson(response));
         resp.setStatus(response.getStatus());
     }
@@ -41,7 +42,8 @@ public class ReminderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.addHeader("Content-Type", "application/json");
         String id = req.getParameter("id");
-        ResponseDTO<ReminderDTO> response = app.get(id);
+        String loggedInUsersEmail = resp.getHeader("logged-in-user");
+        ResponseDTO<ReminderDTO> response = app.get(id, loggedInUsersEmail);
         resp.getWriter().println(gson.toJson(response));
         resp.setStatus(response.getStatus());
     }
