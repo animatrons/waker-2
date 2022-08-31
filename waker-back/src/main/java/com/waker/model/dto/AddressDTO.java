@@ -7,7 +7,7 @@ public class AddressDTO extends ADto {
     private String address2;
     private String address3;
     private String zipCode;
-    private String num;
+    private String number;
 
     @Override
     public boolean validate() {
