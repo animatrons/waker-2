@@ -1,5 +1,5 @@
 {
-	"appId": "com.waker.front",
+	"appId": "io.ionic.starter",
 	"appName": "waker-front",
 	"webDir": "www",
 	"bundledWebRuntime": false

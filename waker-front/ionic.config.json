@@ -1,5 +1,7 @@
 {
   "name": "waker-front",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }
