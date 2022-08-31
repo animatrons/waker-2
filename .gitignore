@@ -104,3 +104,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+#IDEs
+.idea/
+waker-back/.idea/misc.xml
+waker-back/.idea/misc.xml
+waker-back/.idea/compiler.xml
