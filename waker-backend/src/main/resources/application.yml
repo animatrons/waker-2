@@ -19,3 +19,24 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+# Explicit origin list only — never "*" (AD-9). Override per profile as needed.
+waker:
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  structured:
+    format:
+      console: ecs

@@ -1,0 +1,15 @@
+# Gitleaks config for waker-2 (Story 1.2).
+# Extends default rules; allowlists legacy trees that still contain hardcoded secrets.
+# New code under waker-backend/, root compose, .env.example, and .github/ must stay clean.
+
+title = "waker-2"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Exclude legacy stacks until removed; scan rewritten paths only"
+paths = [
+  '''(^|/)waker-back/''',
+  '''(^|/)waker-front/''',
+]
