@@ -73,6 +73,21 @@ class ApiExceptionHandlerTest {
         .andExpect(jsonPath("$.detail").value("Invalid email or password"));
   }
 
+  @Test
+  void rateLimitExceededReturns429ProblemDetail() throws Exception {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(new StubRateLimitController())
+            .setControllerAdvice(new ApiExceptionHandler())
+            .build();
+
+    mockMvc
+        .perform(post("/api/v1/test/rate-limit"))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(jsonPath("$.status").value(429))
+        .andExpect(jsonPath("$.title").value("Too Many Requests"))
+        .andExpect(jsonPath("$.detail").value("Rate limit exceeded. Try again later."));
+  }
+
   @RestController
   @RequestMapping("/api/v1/test")
   static class StubValidationController {
@@ -102,6 +117,16 @@ class ApiExceptionHandlerTest {
     @PostMapping("/unauthorized")
     ResponseEntity<Void> unauthorized() {
       throw new InvalidCredentialsException();
+    }
+  }
+
+  @RestController
+  @RequestMapping("/api/v1/test")
+  static class StubRateLimitController {
+
+    @PostMapping("/rate-limit")
+    ResponseEntity<Void> rateLimit() {
+      throw new RateLimitExceededException(30L);
     }
   }
 }

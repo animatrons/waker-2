@@ -28,5 +28,11 @@ public abstract class AbstractIntegrationTest {
     registry.add("spring.datasource.password", POSTGRES::getPassword);
     registry.add("waker.jwt.secret", () -> "test-jwt-secret-at-least-32-chars-long!!");
     registry.add("waker.jwt.expiration", () -> "1h");
+    // High enough that shared MockMvc remote IP does not exhaust across the suite.
+    // AuthHardeningIT overrides to 3 via its own @DynamicPropertySource (subclass methods
+    // register first; we re-register here last only for non-hardening ITs — hardening
+    // uses DirtiesContext + its own property source set).
+    registry.add("waker.rate-limit.capacity", () -> "1000");
+    registry.add("waker.rate-limit.window", () -> "1m");
   }
 }

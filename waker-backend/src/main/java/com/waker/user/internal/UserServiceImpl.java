@@ -1,5 +1,6 @@
 package com.waker.user.internal;
 
+import com.waker.common.AuthRateLimiter;
 import com.waker.common.EmailAlreadyRegisteredException;
 import com.waker.common.InvalidCredentialsException;
 import com.waker.common.JwtProperties;
@@ -35,6 +36,7 @@ class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final JwtEncoder jwtEncoder;
   private final JwtProperties jwtProperties;
+  private final AuthRateLimiter authRateLimiter;
   private final Clock clock;
 
   UserServiceImpl(
@@ -42,24 +44,29 @@ class UserServiceImpl implements UserService {
       PasswordEncoder passwordEncoder,
       JwtEncoder jwtEncoder,
       JwtProperties jwtProperties,
+      AuthRateLimiter authRateLimiter,
       Clock clock) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtEncoder = jwtEncoder;
     this.jwtProperties = jwtProperties;
+    this.authRateLimiter = authRateLimiter;
     this.clock = clock;
   }
 
   @Override
   @Transactional
   public UserResponse register(RegisterUserRequest request) {
+    String email = request.email().trim().toLowerCase();
+    authRateLimiter.checkOrThrow("email:" + email);
+
     Instant now = Instant.now(clock);
     String passwordHash = passwordEncoder.encode(request.password());
 
     User user =
         new User(
             UUID.randomUUID(),
-            request.email().trim().toLowerCase(),
+            email,
             passwordHash,
             request.firstName().trim(),
             request.lastName().trim(),
@@ -78,6 +85,8 @@ class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public LoginResponse login(LoginRequest request) {
     String email = request.email().trim().toLowerCase();
+    authRateLimiter.checkOrThrow("email:" + email);
+
     User user = userRepository.findByEmail(email).orElse(null);
 
     String passwordHash = user != null ? user.getPasswordHash() : DUMMY_BCRYPT;

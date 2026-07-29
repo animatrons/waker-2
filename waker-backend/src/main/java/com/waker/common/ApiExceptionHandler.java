@@ -61,6 +61,19 @@ public class ApiExceptionHandler {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
   }
 
+  @ExceptionHandler(RateLimitExceededException.class)
+  public ResponseEntity<ProblemDetail> handleRateLimitExceeded(RateLimitExceededException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+    problem.setTitle("Too Many Requests");
+    problem.setType(URI.create("about:blank"));
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS);
+    if (ex.getRetryAfterSeconds() != null) {
+      builder.header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()));
+    }
+    return builder.body(problem);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleGeneric(Exception ex) {
     ProblemDetail problem =

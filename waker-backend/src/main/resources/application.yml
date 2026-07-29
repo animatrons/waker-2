@@ -28,6 +28,9 @@ waker:
   jwt:
     secret: ${WAKER_JWT_SECRET}
     expiration: ${WAKER_JWT_EXPIRATION:1h}
+  rate-limit:
+    capacity: ${WAKER_RATE_LIMIT_CAPACITY:10}
+    window: ${WAKER_RATE_LIMIT_WINDOW:15m}
 
 management:
   endpoints:
