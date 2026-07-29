@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,9 +25,8 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Single deny-by-default {@link SecurityFilterChain} for the modular monolith (AD-9). Public routes
- * are explicit {@code permitAll()} entries only — Story 1.5 will add login here. CSRF is disabled
- * because the API is token-based (JWT in 1.5), not cookie-session; revisit if cookie sessions
- * appear.
+ * are explicit {@code permitAll()} entries only. CSRF is disabled because the API is token-based
+ * (JWT), not cookie-session; revisit if cookie sessions appear.
  */
 @Configuration
 @EnableWebSecurity
@@ -53,9 +53,16 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/register")
                     .permitAll()
-                    // 1.5 will add: POST /api/v1/auth/login
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login")
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
+        .oauth2ResourceServer(
+            oauth2 ->
+                oauth2
+                    .jwt(Customizer.withDefaults())
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler))
         .exceptionHandling(
             exceptions ->
                 exceptions

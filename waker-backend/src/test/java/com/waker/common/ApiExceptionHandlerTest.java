@@ -58,6 +58,21 @@ class ApiExceptionHandlerTest {
         .andExpect(jsonPath("$.detail").value("Email already registered"));
   }
 
+  @Test
+  void invalidCredentialsReturns401ProblemDetail() throws Exception {
+    mockMvc =
+        MockMvcBuilders.standaloneSetup(new StubUnauthorizedController())
+            .setControllerAdvice(new ApiExceptionHandler())
+            .build();
+
+    mockMvc
+        .perform(post("/api/v1/test/unauthorized"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
+        .andExpect(jsonPath("$.title").value("Unauthorized"))
+        .andExpect(jsonPath("$.detail").value("Invalid email or password"));
+  }
+
   @RestController
   @RequestMapping("/api/v1/test")
   static class StubValidationController {
@@ -77,6 +92,16 @@ class ApiExceptionHandlerTest {
     @PostMapping("/conflict")
     ResponseEntity<Void> conflict() {
       throw new EmailAlreadyRegisteredException();
+    }
+  }
+
+  @RestController
+  @RequestMapping("/api/v1/test")
+  static class StubUnauthorizedController {
+
+    @PostMapping("/unauthorized")
+    ResponseEntity<Void> unauthorized() {
+      throw new InvalidCredentialsException();
     }
   }
 }

@@ -52,6 +52,15 @@ public class ApiExceptionHandler {
     return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
   }
 
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidCredentials(InvalidCredentialsException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    problem.setTitle("Unauthorized");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ProblemDetail> handleGeneric(Exception ex) {
     ProblemDetail problem =

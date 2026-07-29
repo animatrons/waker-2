@@ -23,4 +23,9 @@ public class UserController {
     UserResponse created = userService.register(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
+
+  @PostMapping("/login")
+  public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    return ResponseEntity.ok(userService.login(request));
+  }
 }

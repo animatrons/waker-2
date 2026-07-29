@@ -64,6 +64,23 @@ class SecurityContractIT extends AbstractIntegrationTest {
   }
 
   @Test
+  void loginIsPermitAllForUnauthenticatedClients() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "security.login@example.com",
+                      "password": "correct-horse-battery"
+                    }
+                    """))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.detail").value("Invalid email or password"));
+  }
+
+  @Test
   void allowedOriginReceivesCorsHeader() throws Exception {
     String allowed = corsProperties.allowedOrigins().getFirst();
 

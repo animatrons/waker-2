@@ -25,6 +25,9 @@ waker:
   cors:
     allowed-origins:
       - http://localhost:3000
+  jwt:
+    secret: ${WAKER_JWT_SECRET}
+    expiration: ${WAKER_JWT_EXPIRATION:1h}
 
 management:
   endpoints:
