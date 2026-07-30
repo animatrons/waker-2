@@ -1,11 +1,16 @@
 package com.waker.common;
 
+import com.waker.commitment.CommitmentValidationException;
+import com.waker.commitment.ConcurrentCommitmentCapExceededException;
+import com.waker.penalty.InvalidPenaltyConfigException;
+import com.waker.user.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,6 +23,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException ex) {
+    String detail =
+        ex.getMostSpecificCause().getMessage() != null
+            ? ex.getMostSpecificCause().getMessage()
+            : "Malformed JSON request";
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+    problem.setTitle("Validation Failed");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.badRequest().body(problem);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex) {
@@ -29,6 +47,43 @@ public class ApiExceptionHandler {
     problem.setTitle("Validation Failed");
     problem.setType(URI.create("about:blank"));
     return ResponseEntity.badRequest().body(problem);
+  }
+
+  @ExceptionHandler(CommitmentValidationException.class)
+  public ResponseEntity<ProblemDetail> handleCommitmentValidation(
+      CommitmentValidationException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Validation Failed");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.badRequest().body(problem);
+  }
+
+  @ExceptionHandler(InvalidPenaltyConfigException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidPenaltyConfig(
+      InvalidPenaltyConfigException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Validation Failed");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.badRequest().body(problem);
+  }
+
+  @ExceptionHandler(ConcurrentCommitmentCapExceededException.class)
+  public ResponseEntity<ProblemDetail> handleConcurrentCommitmentCap(
+      ConcurrentCommitmentCapExceededException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    problem.setTitle("Conflict");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleUserNotFound(UserNotFoundException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    problem.setTitle("Not Found");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
   }
 
   @ExceptionHandler(ConstraintViolationException.class)

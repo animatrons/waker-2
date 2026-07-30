@@ -7,6 +7,7 @@ import com.waker.common.JwtProperties;
 import com.waker.user.LoginRequest;
 import com.waker.user.LoginResponse;
 import com.waker.user.RegisterUserRequest;
+import com.waker.user.UserNotFoundException;
 import com.waker.user.UserResponse;
 import com.waker.user.UserService;
 import java.time.Clock;
@@ -109,6 +110,12 @@ class UserServiceImpl implements UserService {
             .getTokenValue();
 
     return new LoginResponse(accessToken, "Bearer", jwtProperties.expiration().toSeconds());
+  }
+
+  @Override
+  @Transactional
+  public void lockById(UUID userId) {
+    userRepository.findByIdForUpdate(userId).orElseThrow(UserNotFoundException::new);
   }
 
   private static UserResponse toResponse(User user) {

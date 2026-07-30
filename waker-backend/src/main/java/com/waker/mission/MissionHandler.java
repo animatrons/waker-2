@@ -10,6 +10,13 @@ public interface MissionHandler {
   void validateConfig(MissionConfig config);
 
   /**
+   * Enrich config for persistence — e.g. server-generated math problem (FR-11). Default: identity.
+   */
+  default MissionConfig prepareForPersist(MissionConfig config) {
+    return config;
+  }
+
+  /**
    * Fulfillment verification — implemented in Stories 2.6/2.7.
    *
    * <p>Signature uses UUID + value types only — never {@code Commitment} or {@code User}.

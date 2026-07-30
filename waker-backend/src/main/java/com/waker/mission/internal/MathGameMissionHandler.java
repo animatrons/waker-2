@@ -7,6 +7,7 @@ import com.waker.mission.MissionHandler;
 import com.waker.mission.MissionType;
 import com.waker.mission.MissionVerificationResult;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,15 +20,20 @@ class MathGameMissionHandler implements MissionHandler {
 
   @Override
   public void validateConfig(MissionConfig config) {
-    if (!(config instanceof MathGameMissionConfig math)) {
+    if (!(config instanceof MathGameMissionConfig)) {
       throw new IllegalArgumentException("Expected MathGameMissionConfig for MATH_GAME");
     }
-    if (math.problemStatement() == null || math.problemStatement().isBlank()) {
-      throw new IllegalArgumentException("problemStatement must not be blank");
+  }
+
+  @Override
+  public MissionConfig prepareForPersist(MissionConfig config) {
+    if (!(config instanceof MathGameMissionConfig)) {
+      throw new IllegalArgumentException("Expected MathGameMissionConfig for MATH_GAME");
     }
-    if (math.expectedAnswer() == null || math.expectedAnswer().isBlank()) {
-      throw new IllegalArgumentException("expectedAnswer must not be blank");
-    }
+    int left = ThreadLocalRandom.current().nextInt(1, 10);
+    int right = ThreadLocalRandom.current().nextInt(1, 10);
+    int sum = left + right;
+    return new MathGameMissionConfig(left + " + " + right, String.valueOf(sum));
   }
 
   @Override

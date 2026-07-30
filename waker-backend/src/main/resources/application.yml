@@ -31,6 +31,9 @@ waker:
   rate-limit:
     capacity: ${WAKER_RATE_LIMIT_CAPACITY:10}
     window: ${WAKER_RATE_LIMIT_WINDOW:15m}
+  commitment:
+    edit-window-cooldown: ${WAKER_COMMITMENT_EDIT_WINDOW_COOLDOWN:10m}
+    max-pending: ${WAKER_COMMITMENT_MAX_PENDING:5}
 
 management:
   endpoints:

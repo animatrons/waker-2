@@ -1,5 +1,6 @@
 package com.waker.mission;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.waker.AbstractIntegrationTest;
@@ -36,9 +37,8 @@ class MissionHandlerValidationTest extends AbstractIntegrationTest {
   }
 
   @Test
-  void rejectsBlankMathFields() {
-    assertThatThrownBy(() -> missionDispatch.validateConfig(new MathGameMissionConfig(" ", "12")))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("problemStatement");
+  void acceptsMathGameWireConfigWithoutClientFields() {
+    assertThatCode(() -> missionDispatch.validateConfig(new MathGameMissionConfig(null, null)))
+        .doesNotThrowAnyException();
   }
 }

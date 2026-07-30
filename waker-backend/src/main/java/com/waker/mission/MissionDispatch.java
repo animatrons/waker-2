@@ -42,4 +42,14 @@ public final class MissionDispatch {
         };
     handlers.get(type).validateConfig(config);
   }
+
+  public MissionConfig prepareForPersist(MissionConfig config) {
+    MissionType type =
+        switch (config) {
+          case QrCodeMissionConfig ignored -> MissionType.QR_CODE;
+          case WritingTaskMissionConfig ignored -> MissionType.WRITING_TASK;
+          case MathGameMissionConfig ignored -> MissionType.MATH_GAME;
+        };
+    return handlers.get(type).prepareForPersist(config);
+  }
 }
