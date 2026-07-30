@@ -1,0 +1,39 @@
+package com.waker.penalty.internal;
+
+import com.waker.penalty.InvalidPenaltyConfigException;
+import com.waker.penalty.LeaderboardPenaltyConfig;
+import com.waker.penalty.PenaltyConfig;
+import com.waker.penalty.PenaltyDispatchContext;
+import com.waker.penalty.PenaltyDispatchResult;
+import com.waker.penalty.PenaltyHandler;
+import com.waker.penalty.PenaltyType;
+import java.util.UUID;
+import org.springframework.stereotype.Component;
+
+@Component
+class LeaderboardPenaltyHandler implements PenaltyHandler {
+
+  @Override
+  public PenaltyType penaltyType() {
+    return PenaltyType.LEADERBOARD;
+  }
+
+  @Override
+  public void validateConfig(PenaltyConfig config) {
+    if (!(config instanceof LeaderboardPenaltyConfig leaderboard)) {
+      throw new InvalidPenaltyConfigException("Expected LeaderboardPenaltyConfig for LEADERBOARD");
+    }
+    if (leaderboard.consent() == null) {
+      throw new InvalidPenaltyConfigException("consent must not be null");
+    }
+    if (!leaderboard.consent()) {
+      throw new InvalidPenaltyConfigException("consent must be true at create time");
+    }
+  }
+
+  @Override
+  public PenaltyDispatchResult dispatch(
+      UUID commitmentId, PenaltyConfig config, PenaltyDispatchContext context) {
+    throw new UnsupportedOperationException("Leaderboard penalty dispatch is not implemented yet");
+  }
+}
