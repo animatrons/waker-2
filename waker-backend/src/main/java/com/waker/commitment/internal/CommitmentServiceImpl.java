@@ -1,5 +1,6 @@
 package com.waker.commitment.internal;
 
+import com.waker.commitment.CommitmentNotFoundException;
 import com.waker.commitment.CommitmentProperties;
 import com.waker.commitment.CommitmentResponse;
 import com.waker.commitment.CommitmentService;
@@ -7,6 +8,9 @@ import com.waker.commitment.CommitmentStatus;
 import com.waker.commitment.CommitmentValidationException;
 import com.waker.commitment.ConcurrentCommitmentCapExceededException;
 import com.waker.commitment.CreateCommitmentRequest;
+import com.waker.commitment.EditWindowClosedException;
+import com.waker.commitment.InvalidCommitmentStateException;
+import com.waker.commitment.UpdateCommitmentRequest;
 import com.waker.mission.MissionConfig;
 import com.waker.mission.MissionDispatch;
 import com.waker.penalty.InvalidPenaltyConfigException;
@@ -16,6 +20,7 @@ import com.waker.user.UserService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +44,7 @@ class CommitmentServiceImpl implements CommitmentService {
       CommitmentCreateValidator createValidator,
       CommitmentMapper commitmentMapper,
       CommitmentProperties commitmentProperties,
-      Clock clock) {
+      @Qualifier("commitmentClock") Clock clock) {
     this.userService = userService;
     this.commitmentRepository = commitmentRepository;
     this.missionDispatch = missionDispatch;
@@ -84,6 +89,79 @@ class CommitmentServiceImpl implements CommitmentService {
 
     Commitment saved = commitmentRepository.saveAndFlush(commitment);
     return commitmentMapper.toResponse(saved);
+  }
+
+  @Override
+  @Transactional
+  public CommitmentResponse update(UUID ownerId, UUID id, UpdateCommitmentRequest request) {
+    Commitment existing = loadPendingWithinEditWindow(ownerId, id);
+
+    Instant notifyTime = request.notifyTime().toInstant();
+    Instant deadline = request.deadline().toInstant();
+    createValidator.validateTimingForEdit(existing.getCreatedAt(), notifyTime, deadline);
+
+    MissionConfig missionConfig = validateAndPrepareMission(request.missionConfig());
+    PenaltyConfig penaltyConfig = validatePenalty(request.penaltyConfig());
+
+    Instant now = Instant.now(clock);
+    int rows =
+        commitmentRepository.updateIfPending(
+            id,
+            ownerId,
+            request.name().trim(),
+            normalizeDescription(request.description()),
+            notifyTime,
+            deadline,
+            missionConfig,
+            penaltyConfig,
+            now);
+
+    if (rows != 1) {
+      throw new InvalidCommitmentStateException();
+    }
+
+    return new CommitmentResponse(
+        id,
+        request.name().trim(),
+        normalizeDescription(request.description()),
+        CommitmentStatus.PENDING,
+        notifyTime,
+        deadline,
+        missionConfig,
+        penaltyConfig,
+        existing.getCreatedAt(),
+        now);
+  }
+
+  @Override
+  @Transactional
+  public void cancel(UUID ownerId, UUID id) {
+    loadPendingWithinEditWindow(ownerId, id);
+
+    Instant now = Instant.now(clock);
+    int rows = commitmentRepository.cancelIfPending(id, ownerId, now);
+    if (rows != 1) {
+      throw new InvalidCommitmentStateException();
+    }
+  }
+
+  private Commitment loadPendingWithinEditWindow(UUID ownerId, UUID id) {
+    Commitment commitment =
+        commitmentRepository
+            .findByIdAndUserId(id, ownerId)
+            .orElseThrow(CommitmentNotFoundException::new);
+
+    if (commitment.getStatus() != CommitmentStatus.PENDING) {
+      throw new InvalidCommitmentStateException();
+    }
+
+    Instant now = Instant.now(clock);
+    if (!now.isBefore(
+        createValidator.editWindowEnd(commitment.getCreatedAt(), commitment.getNotifyTime()))) {
+      throw new EditWindowClosedException();
+    }
+
+    return commitment;
   }
 
   private MissionConfig validateAndPrepareMission(MissionConfig config) {

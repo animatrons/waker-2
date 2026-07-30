@@ -88,4 +88,36 @@ class CommitmentValidationTest {
 
     assertThat(validator.editWindowEnd(FIXED_NOW, notifyTime)).isEqualTo(cooldownEnd);
   }
+
+  @Test
+  void validateTimingForEditAnchorsHorizonToCreatedAt() {
+    Instant createdAt = FIXED_NOW;
+    Instant notifyTime = createdAt.plus(Duration.ofHours(1));
+    Instant deadline = createdAt.plus(Duration.ofHours(2));
+
+    assertThatCode(() -> validator.validateTimingForEdit(createdAt, notifyTime, deadline))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void validateTimingForEditRejectsDeadlineBeyondTwentyFourHoursFromCreation() {
+    Instant createdAt = FIXED_NOW;
+    Instant notifyTime = createdAt.plus(Duration.ofHours(2));
+    Instant deadline = createdAt.plus(Duration.ofHours(25));
+
+    assertThatThrownBy(() -> validator.validateTimingForEdit(createdAt, notifyTime, deadline))
+        .isInstanceOf(CommitmentValidationException.class)
+        .hasMessageContaining("deadline");
+  }
+
+  @Test
+  void validateTimingForEditRejectsNotifyTimeBeforeCreatedAtPlusFiveMinutes() {
+    Instant createdAt = FIXED_NOW;
+    Instant notifyTime = createdAt.plus(Duration.ofMinutes(4));
+    Instant deadline = createdAt.plus(Duration.ofHours(1));
+
+    assertThatThrownBy(() -> validator.validateTimingForEdit(createdAt, notifyTime, deadline))
+        .isInstanceOf(CommitmentValidationException.class)
+        .hasMessageContaining("5 minutes");
+  }
 }

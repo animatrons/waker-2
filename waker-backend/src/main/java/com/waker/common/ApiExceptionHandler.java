@@ -1,7 +1,10 @@
 package com.waker.common;
 
+import com.waker.commitment.CommitmentNotFoundException;
 import com.waker.commitment.CommitmentValidationException;
 import com.waker.commitment.ConcurrentCommitmentCapExceededException;
+import com.waker.commitment.EditWindowClosedException;
+import com.waker.commitment.InvalidCommitmentStateException;
 import com.waker.penalty.InvalidPenaltyConfigException;
 import com.waker.user.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -72,6 +75,31 @@ public class ApiExceptionHandler {
   @ExceptionHandler(ConcurrentCommitmentCapExceededException.class)
   public ResponseEntity<ProblemDetail> handleConcurrentCommitmentCap(
       ConcurrentCommitmentCapExceededException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    problem.setTitle("Conflict");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+  }
+
+  @ExceptionHandler(CommitmentNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleCommitmentNotFound(CommitmentNotFoundException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    problem.setTitle("Not Found");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+  }
+
+  @ExceptionHandler(EditWindowClosedException.class)
+  public ResponseEntity<ProblemDetail> handleEditWindowClosed(EditWindowClosedException ex) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    problem.setTitle("Conflict");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+  }
+
+  @ExceptionHandler(InvalidCommitmentStateException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidCommitmentState(
+      InvalidCommitmentStateException ex) {
     ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     problem.setTitle("Conflict");
     problem.setType(URI.create("about:blank"));

@@ -19,9 +19,22 @@ class CommitmentCreateValidator {
   }
 
   void validateTiming(Instant now, Instant notifyTime, Instant deadline) {
-    Instant maxHorizon = now.plus(MAX_HORIZON);
+    validateTimingAnchored(now, notifyTime, deadline);
+  }
 
-    if (notifyTime.isBefore(now.plus(MIN_NOTIFY_LEAD))) {
+  void validateTimingForEdit(Instant createdAt, Instant notifyTime, Instant deadline) {
+    validateTimingAnchored(createdAt, notifyTime, deadline);
+  }
+
+  Instant editWindowEnd(Instant createdAt, Instant notifyTime) {
+    Instant cooldownEnd = createdAt.plus(editWindowCooldown);
+    return cooldownEnd.isBefore(notifyTime) ? cooldownEnd : notifyTime;
+  }
+
+  private void validateTimingAnchored(Instant anchor, Instant notifyTime, Instant deadline) {
+    Instant maxHorizon = anchor.plus(MAX_HORIZON);
+
+    if (notifyTime.isBefore(anchor.plus(MIN_NOTIFY_LEAD))) {
       throw new CommitmentValidationException(
           "notifyTime must be at least 5 minutes ahead of creation");
     }
@@ -35,15 +48,10 @@ class CommitmentCreateValidator {
       throw new CommitmentValidationException("notifyTime must be strictly before deadline");
     }
 
-    Instant editWindowEnd = editWindowEnd(now, notifyTime);
+    Instant editWindowEnd = editWindowEnd(anchor, notifyTime);
     if (deadline.isBefore(editWindowEnd)) {
       throw new CommitmentValidationException(
           "deadline must not fall before the edit window closes");
     }
-  }
-
-  Instant editWindowEnd(Instant createdAt, Instant notifyTime) {
-    Instant cooldownEnd = createdAt.plus(editWindowCooldown);
-    return cooldownEnd.isBefore(notifyTime) ? cooldownEnd : notifyTime;
   }
 }
