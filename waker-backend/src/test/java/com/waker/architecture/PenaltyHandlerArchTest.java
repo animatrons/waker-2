@@ -26,6 +26,17 @@ class PenaltyHandlerArchTest {
           .resideInAnyPackage("com.waker.commitment..")
           .because("AD-2: penalty handlers must not depend on commitment types");
 
+  /** Ledger entity/repo/impl must also stay free of commitment types (Story 3.1 / AD-2). */
+  @ArchTest
+  static final ArchRule penaltyModuleDoesNotDependOnCommitment =
+      noClasses()
+          .that()
+          .resideInAPackage("com.waker.penalty..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAnyPackage("com.waker.commitment..")
+          .because("AD-2: penalty module receives only ids/params — no commitment types");
+
   @ArchTest
   static final ArchRule penaltyHandlersDoNotDependOnUser =
       noClasses()
