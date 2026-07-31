@@ -1,6 +1,7 @@
 package com.waker.commitment.internal;
 
 import com.waker.commitment.CommitmentNotFoundException;
+import com.waker.commitment.CommitmentPageResponse;
 import com.waker.commitment.CommitmentProperties;
 import com.waker.commitment.CommitmentResponse;
 import com.waker.commitment.CommitmentService;
@@ -19,8 +20,12 @@ import com.waker.penalty.PenaltyDispatch;
 import com.waker.user.UserService;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +94,31 @@ class CommitmentServiceImpl implements CommitmentService {
 
     Commitment saved = commitmentRepository.saveAndFlush(commitment);
     return commitmentMapper.toResponse(saved);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public CommitmentResponse getById(UUID ownerId, UUID id) {
+    return commitmentRepository
+        .findByIdAndUserId(id, ownerId)
+        .map(commitmentMapper::toResponse)
+        .orElseThrow(CommitmentNotFoundException::new);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public CommitmentPageResponse list(
+      UUID ownerId, Optional<CommitmentStatus> status, Pageable pageable) {
+    Page<Commitment> page =
+        status
+            .map(s -> commitmentRepository.findByUserIdAndStatus(ownerId, s, pageable))
+            .orElseGet(() -> commitmentRepository.findByUserId(ownerId, pageable));
+
+    List<CommitmentResponse> content =
+        page.getContent().stream().map(commitmentMapper::toResponse).toList();
+
+    return new CommitmentPageResponse(
+        content, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
   }
 
   @Override

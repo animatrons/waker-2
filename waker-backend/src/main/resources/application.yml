@@ -34,6 +34,7 @@ waker:
   commitment:
     edit-window-cooldown: ${WAKER_COMMITMENT_EDIT_WINDOW_COOLDOWN:10m}
     max-pending: ${WAKER_COMMITMENT_MAX_PENDING:5}
+    max-page-size: ${WAKER_COMMITMENT_MAX_PAGE_SIZE:100}
 
 management:
   endpoints:

@@ -6,6 +6,8 @@ import com.waker.penalty.PenaltyConfig;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,10 @@ interface CommitmentRepository extends JpaRepository<Commitment, UUID> {
   long countByUserIdAndStatus(UUID userId, CommitmentStatus status);
 
   Optional<Commitment> findByIdAndUserId(UUID id, UUID userId);
+
+  Page<Commitment> findByUserId(UUID userId, Pageable pageable);
+
+  Page<Commitment> findByUserIdAndStatus(UUID userId, CommitmentStatus status, Pageable pageable);
 
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query(

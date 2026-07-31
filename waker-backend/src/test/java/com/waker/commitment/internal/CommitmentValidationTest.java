@@ -19,7 +19,8 @@ class CommitmentValidationTest {
 
   @BeforeEach
   void setUp() {
-    validator = new CommitmentCreateValidator(new CommitmentProperties(Duration.ofMinutes(10), 5));
+    validator =
+        new CommitmentCreateValidator(new CommitmentProperties(Duration.ofMinutes(10), 5, 100));
   }
 
   @Test
