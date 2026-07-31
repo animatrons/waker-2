@@ -10,10 +10,13 @@ import com.waker.commitment.CommitmentValidationException;
 import com.waker.commitment.ConcurrentCommitmentCapExceededException;
 import com.waker.commitment.CreateCommitmentRequest;
 import com.waker.commitment.EditWindowClosedException;
+import com.waker.commitment.FulfillmentRejectedException;
 import com.waker.commitment.InvalidCommitmentStateException;
 import com.waker.commitment.UpdateCommitmentRequest;
 import com.waker.mission.MissionConfig;
 import com.waker.mission.MissionDispatch;
+import com.waker.mission.MissionFulfillmentProof;
+import com.waker.mission.MissionVerificationResult;
 import com.waker.penalty.InvalidPenaltyConfigException;
 import com.waker.penalty.PenaltyConfig;
 import com.waker.penalty.PenaltyDispatch;
@@ -173,6 +176,41 @@ class CommitmentServiceImpl implements CommitmentService {
     if (rows != 1) {
       throw new InvalidCommitmentStateException();
     }
+  }
+
+  @Override
+  @Transactional
+  public CommitmentResponse fulfill(UUID ownerId, UUID id, MissionFulfillmentProof proof) {
+    Commitment commitment =
+        commitmentRepository
+            .findByIdAndUserId(id, ownerId)
+            .orElseThrow(CommitmentNotFoundException::new);
+
+    if (commitment.getStatus() != CommitmentStatus.PENDING) {
+      throw new InvalidCommitmentStateException();
+    }
+
+    MissionVerificationResult result;
+    try {
+      result = missionDispatch.verifyFulfillment(id, commitment.getMissionConfig(), proof);
+    } catch (IllegalArgumentException ex) {
+      throw new CommitmentValidationException(ex.getMessage());
+    }
+
+    if (!result.accepted()) {
+      throw new FulfillmentRejectedException(result.rejectionReason());
+    }
+
+    Instant now = Instant.now(clock);
+    int rows = commitmentRepository.fulfillIfPending(id, ownerId, now);
+    if (rows != 1) {
+      throw new InvalidCommitmentStateException();
+    }
+
+    return commitmentRepository
+        .findByIdAndUserId(id, ownerId)
+        .map(commitmentMapper::toResponse)
+        .orElseThrow(CommitmentNotFoundException::new);
   }
 
   private Commitment loadPendingWithinEditWindow(UUID ownerId, UUID id) {

@@ -40,6 +40,19 @@ interface CommitmentRepository extends JpaRepository<Commitment, UUID> {
   @Query(
       """
       UPDATE Commitment c
+      SET c.status = com.waker.commitment.CommitmentStatus.FULFILLED,
+          c.updatedAt = :now
+      WHERE c.id = :id
+        AND c.userId = :userId
+        AND c.status = com.waker.commitment.CommitmentStatus.PENDING
+      """)
+  int fulfillIfPending(
+      @Param("id") UUID id, @Param("userId") UUID userId, @Param("now") Instant now);
+
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+      """
+      UPDATE Commitment c
       SET c.name = :name,
           c.description = :description,
           c.notifyTime = :notifyTime,

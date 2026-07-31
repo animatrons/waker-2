@@ -1,5 +1,6 @@
 package com.waker.commitment;
 
+import com.waker.mission.MissionFulfillmentProof;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,6 +77,15 @@ public class CommitmentController {
     UUID ownerId = UUID.fromString(jwt.getSubject());
     commitmentService.cancel(ownerId, id);
     return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/{id}/fulfillment")
+  public ResponseEntity<CommitmentResponse> fulfill(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable UUID id,
+      @Valid @RequestBody MissionFulfillmentProof proof) {
+    UUID ownerId = UUID.fromString(jwt.getSubject());
+    return ResponseEntity.ok(commitmentService.fulfill(ownerId, id, proof));
   }
 
   private void validatePageSize(Pageable pageable) {

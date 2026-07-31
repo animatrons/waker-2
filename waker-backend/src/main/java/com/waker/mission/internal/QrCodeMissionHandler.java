@@ -5,7 +5,9 @@ import com.waker.mission.MissionFulfillmentProof;
 import com.waker.mission.MissionHandler;
 import com.waker.mission.MissionType;
 import com.waker.mission.MissionVerificationResult;
+import com.waker.mission.QrCodeFulfillmentProof;
 import com.waker.mission.QrCodeMissionConfig;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,15 @@ class QrCodeMissionHandler implements MissionHandler {
   @Override
   public MissionVerificationResult verifyFulfillment(
       UUID commitmentId, MissionConfig config, MissionFulfillmentProof proof) {
-    throw new UnsupportedOperationException("QR fulfillment verification is not implemented yet");
+    if (!(config instanceof QrCodeMissionConfig qr)) {
+      throw new IllegalArgumentException("Expected QrCodeMissionConfig for QR_CODE");
+    }
+    if (!(proof instanceof QrCodeFulfillmentProof qrProof)) {
+      throw new IllegalArgumentException("Expected QrCodeFulfillmentProof for QR_CODE");
+    }
+    if (!Objects.equals(qr.codePayload(), qrProof.scannedPayload())) {
+      return MissionVerificationResult.rejected("Scanned payload does not match registered code");
+    }
+    return MissionVerificationResult.success();
   }
 }

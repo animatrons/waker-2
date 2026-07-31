@@ -3,6 +3,7 @@ package com.waker.mission;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public final class MissionDispatch {
 
@@ -51,5 +52,26 @@ public final class MissionDispatch {
           case MathGameMissionConfig ignored -> MissionType.MATH_GAME;
         };
     return handlers.get(type).prepareForPersist(config);
+  }
+
+  public MissionVerificationResult verifyFulfillment(
+      UUID commitmentId, MissionConfig config, MissionFulfillmentProof proof) {
+    MissionType configType =
+        switch (config) {
+          case QrCodeMissionConfig ignored -> MissionType.QR_CODE;
+          case WritingTaskMissionConfig ignored -> MissionType.WRITING_TASK;
+          case MathGameMissionConfig ignored -> MissionType.MATH_GAME;
+        };
+    MissionType proofType =
+        switch (proof) {
+          case QrCodeFulfillmentProof ignored -> MissionType.QR_CODE;
+          case WritingTaskFulfillmentProof ignored -> MissionType.WRITING_TASK;
+          case MathGameFulfillmentProof ignored -> MissionType.MATH_GAME;
+        };
+    if (configType != proofType) {
+      throw new IllegalArgumentException(
+          "Proof type " + proofType + " does not match mission config type " + configType);
+    }
+    return handlers.get(configType).verifyFulfillment(commitmentId, config, proof);
   }
 }

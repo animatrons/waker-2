@@ -1,4 +1,7 @@
 package com.waker.mission;
 
-/** Placeholder proof type — fulfillment verification implemented in Story 2.6. */
-public record QrCodeFulfillmentProof(String scannedPayload) implements MissionFulfillmentProof {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record QrCodeFulfillmentProof(@NotBlank @Size(max = 512) String scannedPayload)
+    implements MissionFulfillmentProof {}

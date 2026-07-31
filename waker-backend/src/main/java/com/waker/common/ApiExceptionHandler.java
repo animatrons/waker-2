@@ -4,6 +4,7 @@ import com.waker.commitment.CommitmentNotFoundException;
 import com.waker.commitment.CommitmentValidationException;
 import com.waker.commitment.ConcurrentCommitmentCapExceededException;
 import com.waker.commitment.EditWindowClosedException;
+import com.waker.commitment.FulfillmentRejectedException;
 import com.waker.commitment.InvalidCommitmentStateException;
 import com.waker.penalty.InvalidPenaltyConfigException;
 import com.waker.user.UserNotFoundException;
@@ -79,6 +80,15 @@ public class ApiExceptionHandler {
     problem.setTitle("Conflict");
     problem.setType(URI.create("about:blank"));
     return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+  }
+
+  @ExceptionHandler(FulfillmentRejectedException.class)
+  public ResponseEntity<ProblemDetail> handleFulfillmentRejected(FulfillmentRejectedException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Validation Failed");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.badRequest().body(problem);
   }
 
   @ExceptionHandler(CommitmentNotFoundException.class)
