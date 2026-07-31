@@ -48,6 +48,44 @@ class MissionDispatchConfigTest {
         .hasMessageContaining("Duplicate MissionHandler for QR_CODE");
   }
 
+  @Test
+  void verifyFulfillmentRejectsWritingConfigWithQrProof() {
+    MissionDispatch dispatch =
+        MissionDispatch.fromHandlers(
+            List.of(
+                stubHandler(MissionType.QR_CODE),
+                stubHandler(MissionType.WRITING_TASK),
+                stubHandler(MissionType.MATH_GAME)));
+
+    assertThatThrownBy(
+            () ->
+                dispatch.verifyFulfillment(
+                    UUID.randomUUID(),
+                    new WritingTaskMissionConfig("prompt", 10),
+                    new QrCodeFulfillmentProof("payload")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("does not match");
+  }
+
+  @Test
+  void verifyFulfillmentRejectsMathConfigWithWritingProof() {
+    MissionDispatch dispatch =
+        MissionDispatch.fromHandlers(
+            List.of(
+                stubHandler(MissionType.QR_CODE),
+                stubHandler(MissionType.WRITING_TASK),
+                stubHandler(MissionType.MATH_GAME)));
+
+    assertThatThrownBy(
+            () ->
+                dispatch.verifyFulfillment(
+                    UUID.randomUUID(),
+                    new MathGameMissionConfig("3 + 4", "7"),
+                    new WritingTaskFulfillmentProof("enough text here")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("does not match");
+  }
+
   private static MissionHandler stubHandler(MissionType type) {
     return new MissionHandler() {
       @Override
