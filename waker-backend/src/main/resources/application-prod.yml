@@ -1,0 +1,18 @@
+# Production mail: Postmark SMTP (same JavaMail path as local Mailpit).
+# Requires POSTMARK_SERVER_TOKEN and a verified WAKER_MAIL_FROM sender/domain.
+spring:
+  mail:
+    host: smtp.postmarkapp.com
+    port: 587
+    username: ${POSTMARK_SERVER_TOKEN}
+    password: ${POSTMARK_SERVER_TOKEN}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+waker:
+  mail:
+    from: ${WAKER_MAIL_FROM}

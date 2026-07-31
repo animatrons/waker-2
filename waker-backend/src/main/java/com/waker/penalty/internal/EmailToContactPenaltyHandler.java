@@ -9,13 +9,24 @@ import com.waker.penalty.PenaltyHandler;
 import com.waker.penalty.PenaltyType;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Component;
 
 @Component
 class EmailToContactPenaltyHandler implements PenaltyHandler {
 
+  private static final Logger log = LoggerFactory.getLogger(EmailToContactPenaltyHandler.class);
+
   private static final Pattern EMAIL_PATTERN =
       Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+  private final SmtpEmailSender emailSender;
+
+  EmailToContactPenaltyHandler(SmtpEmailSender emailSender) {
+    this.emailSender = emailSender;
+  }
 
   @Override
   public PenaltyType penaltyType() {
@@ -48,6 +59,39 @@ class EmailToContactPenaltyHandler implements PenaltyHandler {
   @Override
   public PenaltyDispatchResult dispatch(
       UUID commitmentId, PenaltyConfig config, PenaltyDispatchContext context) {
-    throw new UnsupportedOperationException("Email penalty dispatch is not implemented yet");
+    if (!(config instanceof EmailToContactPenaltyConfig email)) {
+      throw new IllegalArgumentException(
+          "Expected EmailToContactPenaltyConfig for EMAIL_TO_CONTACT");
+    }
+
+    String subject = subjectFor(context);
+    String body = bodyFor(email, context);
+
+    try {
+      emailSender.sendPlainText(email.contactEmail(), subject, body);
+      return PenaltyDispatchResult.success("email accepted by SMTP");
+    } catch (MailException ex) {
+      log.error("EMAIL_TO_CONTACT dispatch failed commitmentId={}", commitmentId, ex);
+      return PenaltyDispatchResult.failure(ex.getMessage());
+    }
+  }
+
+  private static String subjectFor(PenaltyDispatchContext context) {
+    String name = context != null ? context.commitmentName() : null;
+    if (name == null || name.isBlank()) {
+      return "Waker commitment missed";
+    }
+    return "Waker commitment missed: " + name;
+  }
+
+  private static String bodyFor(EmailToContactPenaltyConfig email, PenaltyDispatchContext context) {
+    StringBuilder body = new StringBuilder(email.message());
+    if (context != null) {
+      String name = context.commitmentName();
+      if (name != null && !name.isBlank()) {
+        body.append("\n\nCommitment: ").append(name);
+      }
+    }
+    return body.toString();
   }
 }

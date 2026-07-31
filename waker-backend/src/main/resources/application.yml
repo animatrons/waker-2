@@ -16,6 +16,17 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS:false}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -35,6 +46,8 @@ waker:
     edit-window-cooldown: ${WAKER_COMMITMENT_EDIT_WINDOW_COOLDOWN:10m}
     max-pending: ${WAKER_COMMITMENT_MAX_PENDING:5}
     max-page-size: ${WAKER_COMMITMENT_MAX_PAGE_SIZE:100}
+  mail:
+    from: ${WAKER_MAIL_FROM:waker@localhost}
 
 management:
   endpoints:
@@ -45,6 +58,10 @@ management:
     health:
       probes:
         enabled: true
+  health:
+    # Penalty SMTP is async outbox delivery — not a readiness dependency (Story 3.6 owns sweep health).
+    mail:
+      enabled: false
 
 logging:
   structured:
