@@ -118,6 +118,15 @@ class UserServiceImpl implements UserService {
     userRepository.findByIdForUpdate(userId).orElseThrow(UserNotFoundException::new);
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public UserResponse getById(UUID id) {
+    return userRepository
+        .findById(id)
+        .map(UserServiceImpl::toResponse)
+        .orElseThrow(UserNotFoundException::new);
+  }
+
   private static UserResponse toResponse(User user) {
     return new UserResponse(
         user.getId(),

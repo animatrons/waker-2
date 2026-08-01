@@ -59,4 +59,18 @@ class PenaltyEventLedgerImpl implements PenaltyEventLedger {
     }
     return penaltyEventRepository.findPendingIds(PageRequest.of(0, limit));
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<PendingPenaltyEvent> findPendingEvents(int limit) {
+    if (limit < 1) {
+      return List.of();
+    }
+    return penaltyEventRepository.findPending(PageRequest.of(0, limit)).stream()
+        .map(
+            event ->
+                new PendingPenaltyEvent(
+                    event.getId(), event.getCommitmentId(), event.getPenaltyType()))
+        .toList();
+  }
 }

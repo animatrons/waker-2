@@ -144,6 +144,27 @@ class PenaltyEventLedgerIT extends AbstractIntegrationTest {
   }
 
   @Test
+  void findPendingEventsReturnsOldestFirstWithTypeAndCommitment() {
+    UUID olderCommitment = insertFixtureCommitment();
+    UUID newerCommitment = insertFixtureCommitment();
+    UUID older = penaltyEventLedger.insertPending(olderCommitment, PenaltyType.EMAIL_TO_CONTACT);
+    UUID newer = penaltyEventLedger.insertPending(newerCommitment, PenaltyType.LEADERBOARD);
+    penaltyEventLedger.claim(newer);
+
+    List<PenaltyEventLedger.PendingPenaltyEvent> pending = penaltyEventLedger.findPendingEvents(50);
+
+    assertThat(pending)
+        .anySatisfy(
+            event -> {
+              assertThat(event.id()).isEqualTo(older);
+              assertThat(event.commitmentId()).isEqualTo(olderCommitment);
+              assertThat(event.penaltyType()).isEqualTo(PenaltyType.EMAIL_TO_CONTACT);
+            });
+    assertThat(pending).noneMatch(event -> event.id().equals(newer));
+    assertThat(penaltyEventLedger.findPendingEvents(0)).isEmpty();
+  }
+
+  @Test
   void uniqueCommitmentIdRejectsSecondPendingRow() {
     UUID commitmentId = insertFixtureCommitment();
     penaltyEventLedger.insertPending(commitmentId, PenaltyType.EMAIL_TO_CONTACT);

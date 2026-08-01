@@ -18,21 +18,27 @@ class CommitmentSweepJob {
   private final Clock clock;
   private final CommitmentRepository commitmentRepository;
   private final CommitmentMissEnforcer missEnforcer;
+  private final PenaltyDispatcher penaltyDispatcher;
 
   CommitmentSweepJob(
       @Qualifier("commitmentClock") Clock clock,
       CommitmentRepository commitmentRepository,
-      CommitmentMissEnforcer missEnforcer) {
+      CommitmentMissEnforcer missEnforcer,
+      PenaltyDispatcher penaltyDispatcher) {
     this.clock = clock;
     this.commitmentRepository = commitmentRepository;
     this.missEnforcer = missEnforcer;
+    this.penaltyDispatcher = penaltyDispatcher;
   }
 
+  /** Same cadence: miss-pass then dispatch-pass (AD-5 / Story 3.5). */
   @Scheduled(fixedDelayString = "${waker.sweep.interval}")
-  void sweep() {
+  void scheduledCycle() {
     runSweep();
+    runDispatch();
   }
 
+  /** Miss detection only — used by tests that assert PENDING outbox before dispatch. */
   void runSweep() {
     Instant now = Instant.now(clock);
     List<UUID> overdueIds = commitmentRepository.findOverduePendingIds(now);
@@ -43,5 +49,10 @@ class CommitmentSweepJob {
         log.error("Sweep failed for commitmentId={}", commitmentId, ex);
       }
     }
+  }
+
+  /** Outbox relay only — used by reliability ITs and after miss-pass in production. */
+  void runDispatch() {
+    penaltyDispatcher.dispatchPending();
   }
 }

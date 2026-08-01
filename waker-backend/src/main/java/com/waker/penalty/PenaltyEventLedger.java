@@ -10,6 +10,9 @@ import java.util.UUID;
  */
 public interface PenaltyEventLedger {
 
+  /** Dispatcher-facing pending row — enough to claim + route without `penalty.internal`. */
+  record PendingPenaltyEvent(UUID id, UUID commitmentId, PenaltyType penaltyType) {}
+
   /** Insert outcome=PENDING. Joins caller's transaction. Returns new event id. */
   UUID insertPending(UUID commitmentId, PenaltyType penaltyType);
 
@@ -24,4 +27,7 @@ public interface PenaltyEventLedger {
 
   /** Oldest-first PENDING ids, capped — for dispatcher pass (Story 3.5). */
   List<UUID> findPendingEventIds(int limit);
+
+  /** Oldest-first PENDING events with type/commitment, capped — for dispatcher pass (Story 3.5). */
+  List<PendingPenaltyEvent> findPendingEvents(int limit);
 }

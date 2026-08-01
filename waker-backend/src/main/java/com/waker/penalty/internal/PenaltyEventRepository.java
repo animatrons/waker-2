@@ -47,4 +47,12 @@ interface PenaltyEventRepository extends JpaRepository<PenaltyEvent, UUID> {
       ORDER BY e.createdAt ASC
       """)
   List<UUID> findPendingIds(Pageable pageable);
+
+  @Query(
+      """
+      SELECT e FROM PenaltyEvent e
+      WHERE e.outcome = com.waker.penalty.PenaltyEventOutcome.PENDING
+      ORDER BY e.createdAt ASC
+      """)
+  List<PenaltyEvent> findPending(Pageable pageable);
 }

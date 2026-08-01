@@ -46,6 +46,7 @@ waker:
     max-page-size: ${WAKER_PENALTY_MAX_PAGE_SIZE:100}
   sweep:
     interval: ${WAKER_SWEEP_INTERVAL:60s}
+    dispatch-batch-size: ${WAKER_SWEEP_DISPATCH_BATCH_SIZE:50}
 
 management:
   endpoints:
