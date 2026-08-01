@@ -19,23 +19,32 @@ class CommitmentSweepJob {
   private final CommitmentRepository commitmentRepository;
   private final CommitmentMissEnforcer missEnforcer;
   private final PenaltyDispatcher penaltyDispatcher;
+  private final SweepHealthState sweepHealthState;
 
   CommitmentSweepJob(
       @Qualifier("commitmentClock") Clock clock,
       CommitmentRepository commitmentRepository,
       CommitmentMissEnforcer missEnforcer,
-      PenaltyDispatcher penaltyDispatcher) {
+      PenaltyDispatcher penaltyDispatcher,
+      SweepHealthState sweepHealthState) {
     this.clock = clock;
     this.commitmentRepository = commitmentRepository;
     this.missEnforcer = missEnforcer;
     this.penaltyDispatcher = penaltyDispatcher;
+    this.sweepHealthState = sweepHealthState;
   }
 
-  /** Same cadence: miss-pass then dispatch-pass (AD-5 / Story 3.5). */
+  /** Same cadence: miss-pass then dispatch-pass (AD-5 / Story 3.5); mark Actuator health (3.6). */
   @Scheduled(fixedDelayString = "${waker.sweep.interval}")
   void scheduledCycle() {
-    runSweep();
-    runDispatch();
+    try {
+      runSweep();
+      runDispatch();
+      sweepHealthState.markSuccess();
+    } catch (RuntimeException ex) {
+      log.error("Sweep cycle failed", ex);
+      sweepHealthState.markFailure(ex);
+    }
   }
 
   /** Miss detection only — used by tests that assert PENDING outbox before dispatch. */

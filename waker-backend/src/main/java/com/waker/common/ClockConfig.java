@@ -16,7 +16,8 @@ public class ClockConfig {
   }
 
   @Bean("commitmentClock")
-  @Profile("!commitment-edit-it & !commitment-sweep-it & !penalty-dispatch-reliability-it")
+  @Profile(
+      "!commitment-edit-it & !commitment-sweep-it & !penalty-dispatch-reliability-it & !sweep-health-it")
   Clock commitmentClock() {
     return Clock.systemUTC();
   }
