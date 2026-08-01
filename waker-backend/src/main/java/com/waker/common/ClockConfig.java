@@ -16,7 +16,7 @@ public class ClockConfig {
   }
 
   @Bean("commitmentClock")
-  @Profile("!commitment-edit-it")
+  @Profile("!commitment-edit-it & !commitment-sweep-it")
   Clock commitmentClock() {
     return Clock.systemUTC();
   }

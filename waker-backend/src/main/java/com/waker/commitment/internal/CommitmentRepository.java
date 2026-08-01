@@ -4,6 +4,7 @@ import com.waker.commitment.CommitmentStatus;
 import com.waker.mission.MissionConfig;
 import com.waker.penalty.PenaltyConfig;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,25 @@ interface CommitmentRepository extends JpaRepository<Commitment, UUID> {
   Page<Commitment> findByUserId(UUID userId, Pageable pageable);
 
   Page<Commitment> findByUserIdAndStatus(UUID userId, CommitmentStatus status, Pageable pageable);
+
+  @Query(
+      """
+      SELECT c.id FROM Commitment c
+      WHERE c.status = com.waker.commitment.CommitmentStatus.PENDING
+        AND c.deadline < :now
+      """)
+  List<UUID> findOverduePendingIds(@Param("now") Instant now);
+
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+      """
+      UPDATE Commitment c
+      SET c.status = com.waker.commitment.CommitmentStatus.MISSED,
+          c.updatedAt = :now
+      WHERE c.id = :id
+        AND c.status = com.waker.commitment.CommitmentStatus.PENDING
+      """)
+  int markMissedIfPending(@Param("id") UUID id, @Param("now") Instant now);
 
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query(

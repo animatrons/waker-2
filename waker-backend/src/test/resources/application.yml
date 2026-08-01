@@ -1,10 +1,8 @@
+# Test classpath application.yml shadows main's same-named file — mirror required keys.
 spring:
-  application:
-    name: waker-backend
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+  task:
+    scheduling:
+      enabled: false
   jpa:
     open-in-view: false
     hibernate:
@@ -28,10 +26,6 @@ spring:
           starttls:
             enable: ${SPRING_MAIL_SMTP_STARTTLS:false}
 
-server:
-  port: ${SERVER_PORT:8080}
-
-# Explicit origin list only — never "*" (AD-9). Override per profile as needed.
 waker:
   cors:
     allowed-origins:
@@ -63,11 +57,5 @@ management:
       probes:
         enabled: true
   health:
-    # Penalty SMTP is async outbox delivery — not a readiness dependency (Story 3.6 owns sweep health).
     mail:
       enabled: false
-
-logging:
-  structured:
-    format:
-      console: ecs
