@@ -7,6 +7,7 @@ import com.waker.commitment.EditWindowClosedException;
 import com.waker.commitment.FulfillmentRejectedException;
 import com.waker.commitment.InvalidCommitmentStateException;
 import com.waker.penalty.InvalidPenaltyConfigException;
+import com.waker.penalty.PenaltyValidationException;
 import com.waker.user.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -66,6 +67,15 @@ public class ApiExceptionHandler {
   @ExceptionHandler(InvalidPenaltyConfigException.class)
   public ResponseEntity<ProblemDetail> handleInvalidPenaltyConfig(
       InvalidPenaltyConfigException ex) {
+    ProblemDetail problem =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+    problem.setTitle("Validation Failed");
+    problem.setType(URI.create("about:blank"));
+    return ResponseEntity.badRequest().body(problem);
+  }
+
+  @ExceptionHandler(PenaltyValidationException.class)
+  public ResponseEntity<ProblemDetail> handlePenaltyValidation(PenaltyValidationException ex) {
     ProblemDetail problem =
         ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
     problem.setTitle("Validation Failed");

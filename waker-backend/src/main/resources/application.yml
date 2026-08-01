@@ -48,6 +48,8 @@ waker:
     max-page-size: ${WAKER_COMMITMENT_MAX_PAGE_SIZE:100}
   mail:
     from: ${WAKER_MAIL_FROM:waker@localhost}
+  penalty:
+    max-page-size: ${WAKER_PENALTY_MAX_PAGE_SIZE:100}
 
 management:
   endpoints:

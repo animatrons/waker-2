@@ -18,7 +18,7 @@ class ApplicationContextIT extends AbstractIntegrationTest {
         jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM flyway_schema_history WHERE success = true", Integer.class);
 
-    assertThat(applied).as("Flyway should have applied V1–V4 migrations").isGreaterThanOrEqualTo(4);
+    assertThat(applied).as("Flyway should have applied V1–V5 migrations").isGreaterThanOrEqualTo(5);
     assertThat(POSTGRES.isRunning()).as("singleton Postgres container must stay up").isTrue();
   }
 }
